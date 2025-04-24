@@ -85,3 +85,8 @@ while True:
         print( "player buzzed:" )
         for i in range( len( client_list ) ):
             clients[ client_list[i] ].send( 'reset' )
+
+
+
+# ajouter le son
+# vérifier que le joueur buzz une seule fois, même du coté serveur
