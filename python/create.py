@@ -1,12 +1,47 @@
-# first of all import the socket library
 import socket
 import random
 import threading
+import pygame
+from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume
+from comtypes import CLSCTX_ALL
+
+def play_mp3():
+    file = open( "../assets/audio.txt", 'r' )
+    file_path = "../assets/" + file.readline()
+    file.close()
+    try:
+        set_volume( 50 )
+        pygame.mixer.init()
+        pygame.mixer.music.load(file_path)
+        pygame.mixer.music.play()
+        while pygame.mixer.music.get_busy():
+            continue
+    except Exception as e:
+        print(f"Erreur lors de la lecture du fichier : {e}")
+    finally:
+        pygame.mixer.music.stop()
+        pygame.mixer.quit()
+
+
+def set_volume( level ):
+    try:
+        devices = AudioUtilities.GetSpeakers()
+        interface = devices.Activate(
+            IAudioEndpointVolume._iid_, CLSCTX_ALL, None)
+        volume = interface.QueryInterface(IAudioEndpointVolume)
+        
+        volume.SetMasterVolumeLevelScalar(level/100, None)
+    except Exception as e:
+        print(f"Erreur lors du réglage du volume : {e}")
+
+
+
 
 class Client:
     client = None
     ip = None
     name = None
+    buzzed = 0
 
     def __init__( self, c, addr ):
         self.client = c
@@ -19,11 +54,17 @@ class Client:
         x = self.client.recv( 1024 ).decode()
         return x
     
-    def buzzed( self ):
+    def buzz( self ):
         while True:
             x = self.receive()
-            if x == "buzz":
+            if x == "buzz" and self.buzzed == 0:
+                self.buzzed = 1
                 print( self.name, "buzzed" )
+                send_to_all( "buzzed:" + self.name )
+                if not already_buzzed:
+                    already_buzzed = True
+                    play_mp3()
+
 
 def code():
     a = socket.gethostbyname( socket.gethostname() ).split( '.' )
@@ -38,24 +79,21 @@ def code():
 
 
 
+def send_to_all( msg ):
+    global client_list
+    global clients
 
-# next create a socket object
+    for i in range( len( client_list ) ):
+        clients[client_list[i]].send( msg )
+
 s = socket.socket()
 
-# reserve a port on your computer in our
-# case it is 57542 but it can be anything
-
 port = 57542
-
-# Next bind to the port 
-# we have not typed any ip in the ip field
-# instead we have inputted an empty string
-# this makes the server listen to requests
-# coming from other computers on the network
 
 clients = {}
 client_list = []
 client_threads = []
+already_buzzed = False
 
 def connect():
     global clients
@@ -70,7 +108,7 @@ def connect():
         tmp_client.name = name
         clients[name] = tmp_client
         client_list.append( name )
-        client_threads.append( threading.Thread( target=clients[name].buzzed ) )
+        client_threads.append( threading.Thread( target=clients[name].buzz ) )
         client_threads[len( client_threads )-1].start()
 
 
@@ -85,8 +123,10 @@ while True:
         print( "player buzzed:" )
         for i in range( len( client_list ) ):
             clients[ client_list[i] ].send( 'reset' )
+        already_buzzed = False
 
 
 
-# ajouter le son
-# vérifier que le joueur buzz une seule fois, même du coté serveur
+# ajouter le son - fait
+# vérifier que le joueur buzz une seule fois, même du coté serveur - fait
+# Faire que tout les joueurs savent qui a buzzé
