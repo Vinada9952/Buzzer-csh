@@ -1,6 +1,12 @@
 # Import socket module 
 import socket
 
+def decode( room ):
+    a = []
+    for i in range( 4 ):
+        a.append( str( int( room[i+i].replace( 'x', '' ) + room[i+i+1].replace( 'x', '' ), 16 ) ) )
+    return '.'.join( a )
+
 # Create a socket object 
 s = socket.socket()
 

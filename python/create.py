@@ -3,6 +3,18 @@ import socket
 import random
 import threading
 
+def code():
+    a = socket.gethostbyname( socket.gethostname() ).split( '.' )
+
+    for i in range( len( a ) ):
+        a[i] = str( hex( int( a[i] ) ) ).replace( '0x', '' )
+        if len( a[i] ) == 1:
+            a[i] = 'x' + a[i]
+        
+
+    return ''.join( a )
+
+print( "room code :", code() )
 
 class Client:
     client = None
