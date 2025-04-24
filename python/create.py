@@ -17,9 +17,13 @@ class Client:
     
     def receive( self ):
         x = self.client.recv( 1024 ).decode()
-        if x == 'buzz':
-            print( self.name, "buzzed" )
         return x
+    
+    def buzzed( self ):
+        while True:
+            x = self.receive()
+            if x == "buzz":
+                print( self.name, "buzzed" )
 
 def code():
     a = socket.gethostbyname( socket.gethostname() ).split( '.' )
@@ -64,10 +68,10 @@ def connect():
         tmp_client.send( "name?" )
         name = tmp_client.receive()
         tmp_client.name = name
-        clients[ name ] = tmp_client
+        clients[name] = tmp_client
         client_list.append( name )
-        client_threads.append( threading.Thread( target=clients[name].receive ) )
-        client_threads[-1].start()
+        client_threads.append( threading.Thread( target=clients[name].buzzed ) )
+        client_threads[len( client_threads )-1].start()
 
 
 code()
@@ -78,5 +82,6 @@ th_connect.start()
 while True:
     if input() == '':
         print( "\n\n"*100 )
+        print( "player buzzed:" )
         for i in range( len( client_list ) ):
             clients[ client_list[i] ].send( 'reset' )

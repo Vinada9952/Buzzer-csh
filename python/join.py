@@ -19,6 +19,7 @@ s.connect( ( decode( input( "room code\n-> " ) ), port ) )
 
 if s.recv( 1024 ).decode() == 'name?':
     name = input( "name\n-> " )
+    print( name )
     s.send( name.encode() )
 
 buzzed = 0
