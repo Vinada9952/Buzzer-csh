@@ -131,4 +131,4 @@ while True:
 
 # ajouter le son - fait
 # vérifier que le joueur buzz une seule fois, même du coté serveur - fait
-# Faire que tout les joueurs savent qui a buzzé
+# Faire que tout les joueurs savent qui a buzzé - À corriger, il affiche mal une fois buzzé
