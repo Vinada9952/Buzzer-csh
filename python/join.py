@@ -60,10 +60,10 @@ def buzz():
     global buzzed
     global buzzed_list
     while True:
-        input()
+        x = input()
         if not buzzed:
             buzzed = True
-            s.send( 'buzz'.encode() )
+            s.send( str( 'buzz:' + x ).encode() )
 
 def revc():
     global buzzed_list
@@ -74,6 +74,7 @@ def revc():
             buzzed = False
             print( "\n\n"*100 )
             print( "buzz" )
+            buzzed_list = []
         elif recv.find( "buzzed:" ) == 0:
             recv = recv.replace( 'buzzed:', '' )
             buzzed_list.append( recv )
@@ -85,6 +86,16 @@ def revc():
                 play_mp3()
             if not buzzed:
                 print( "buzz" )
+        elif recv.find( "answer:" ) == 0:
+            recv = recv.replace( "answer:", '' )
+            buzzed_list.append( recv )
+            print( '\n\n'*100 )
+            print( "player buzzed:" )
+            for i in range( len( buzzed_list ) ):
+                print( buzzed_list[i] )
+            if not buzzed:
+                print( "buzz" )
+
 
 
 print( "\n\n"*100 )

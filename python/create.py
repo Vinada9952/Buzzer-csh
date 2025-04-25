@@ -26,7 +26,7 @@ class Client:
     client = None
     ip = None
     name = None
-    buzzed = 0
+    buzzed = False
 
     def __init__( self, c, addr ):
         self.client = c
@@ -39,6 +39,7 @@ class Client:
             pass
     
     def receive( self ):
+        x = ""
         try:
             x = self.client.recv( 1024 ).decode()
         except ConnectionResetError:
@@ -49,13 +50,19 @@ class Client:
         global already_buzzed
         while True:
             x = self.receive()
-            if x == "buzz" and self.buzzed == 0:
-                self.buzzed = 1
+            if x == "buzz:" and not self.buzzed:
+                self.buzzed = True
                 print( self.name, "buzzed" )
                 send_to_all( "buzzed:" + self.name )
                 if not already_buzzed:
                     already_buzzed = True
                     play_mp3()
+            elif x.find( "buzz:" ) == 0:
+                if not self.buzzed:
+                    self.buzzed = True
+                    print( self.name, "said", x.replace( "buzz:", "" ) )
+                    send_to_all( "answer:" + self.name )
+
 
 
 def code():
@@ -126,7 +133,8 @@ code()
 th_connect = threading.Thread( target=connect )
 th_connect.start()
 while True:
-    if input() == '':
+    x = input()
+    if x == '':
         print( "\n\n"*100 )
         print( "player buzzed:" )
         for i in range( len( client_list ) ):
