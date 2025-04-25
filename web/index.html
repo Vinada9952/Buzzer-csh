@@ -1,0 +1,23 @@
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>CSH buzzer</title>
+        <link rel="stylesheet" href="styles.css">
+    </head>
+    <body>
+            <div id="container">
+                <h1>CSH buzzer</h1>
+                <button id="join-button">Rejoindre</button>
+                <button id="create-button">Créer une salle</button>
+            </div>
+            <script>
+                document.getElementById("join-button").addEventListener("click", function() {
+                    window.location.href = "create/index.html";
+                });
+                document.getElementById("create-button").addEventListener("click", function() {
+                    window.location.href = "join/index.html";
+                });
+            </script>
+    </body>
+</html>
