@@ -33,10 +33,16 @@ class Client:
         self.ip = addr
     
     def send( self, msg ):
-        self.client.send( msg.encode() )
+        try:
+            self.client.send( msg.encode() )
+        except ConnectionResetError:
+            pass
     
     def receive( self ):
-        x = self.client.recv( 1024 ).decode()
+        try:
+            x = self.client.recv( 1024 ).decode()
+        except ConnectionResetError:
+            pass
         return x
     
     def buzz( self ):
@@ -70,7 +76,10 @@ def send_to_all( msg ):
     global clients
 
     for i in range( len( client_list ) ):
-        clients[client_list[i]].send( msg )
+        try:
+            clients[client_list[i]].send( msg )
+        except ConnectionResetError:
+            pass
 
 s = socket.socket()
 
@@ -124,11 +133,3 @@ while True:
             clients[ client_list[i] ].send( 'reset' )
             clients[ client_list[i] ].buzzed = 0
         already_buzzed = False
-
-
-
-# ajouter le son - fait
-# vérifier que le joueur buzz une seule fois, même du coté serveur - fait
-# Faire que tout les joueurs savent qui a buzzé - fait
-# deux joueurs ne peuvent pas avoir le même nom - à tester
-# l'hôte ne doit pas crash quand des joueurs déconnectent
