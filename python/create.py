@@ -6,9 +6,10 @@ from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume
 from comtypes import CLSCTX_ALL
 
 def play_mp3():
-    file = open( "../assets/audio.txt", 'r' )
-    file_path = "../assets/" + file.readline()
-    file.close()
+    # file = open( "../assets/audio.txt", 'r' )
+    # file_path = "../assets/" + file.readline()
+    # file.close()
+    file_path = "../assets/shortBuzz.mp3"
     try:
         set_volume( 50 )
         pygame.mixer.init()
@@ -55,6 +56,7 @@ class Client:
         return x
     
     def buzz( self ):
+        global already_buzzed
         while True:
             x = self.receive()
             if x == "buzz" and self.buzzed == 0:

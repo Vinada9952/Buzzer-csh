@@ -6,9 +6,10 @@ from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume
 from comtypes import CLSCTX_ALL
 
 def play_mp3():
-    file = open( "../assets/audio.txt", 'r' )
-    file_path = "../assets/" + file.readline()
-    file.close()
+    # file = open( "../assets/audio.txt", 'r' )
+    # file_path = "../assets/" + file.readline()
+    # file.close()
+    file_path = "../assets/shortBuzz.mp3"
     try:
         pygame.mixer.init()
         pygame.mixer.music.load(file_path)
@@ -62,8 +63,6 @@ def buzz():
         if buzzed == 0:
             buzzed = 1
             s.send( 'buzz'.encode() )
-            print( "\n\n"*100 )
-            print( "you buzzed" )
             play_mp3()
 
 def revc():
@@ -81,6 +80,7 @@ def revc():
             print( '\n\n'*100 )
             for i in range( len( buzzed_list ) ):
                 print( buzzed_list[i] )
+            print( "buzz" )
 
 
 print( "\n\n"*100 )
