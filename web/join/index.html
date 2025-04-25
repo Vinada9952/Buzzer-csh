@@ -14,20 +14,30 @@
     </head>
     <body>
         <div id="container">
-            <div id="room_code">
-                <input type="text" id="room-code-input" placeholder="Code de la salle" required>
+            
+            <h1 style="color: white;" >Buzzer CSH</h1>
+
+            <div id="room-code">
+                <input type="text" id="room-code-input" placeholder="Code de la salle" required><br>
                 <button id="room-code-submit">Entrer</button>
             </div>
-
-            <button id="buzzer">Buzz</button>
             
-            <div id="players-buzzed">
-                <h2>Buzzed players</h2>
+            <div id="in-game">
+                <button id="buzzer">Buzz</button>
+
+                <div id="type-answer">
+                    <input type="text" id="answer-input" placeholder="Entrez votre code" required><br>
+                    <button id="answer-submit">Soumettre</button>
+                </div>
+
+                <div id="players-buzzed">
+                    <h2 style="color: white;">Buzzed players</h2>
+                </div>
             </div>
+
         </div>
 
 
-    <script src="scripts.js">
-    </script>
+    <script src="scripts.js"></script>
     </body>
 </html>
