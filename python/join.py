@@ -2,8 +2,6 @@ import socket
 import random
 import threading
 import pygame
-from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume
-from comtypes import CLSCTX_ALL
 
 def play_mp3():
     # file = open( "../assets/audio.txt", 'r' )
@@ -23,16 +21,6 @@ def play_mp3():
         pygame.mixer.quit()
 
 
-def set_volume( level ):
-    try:
-        devices = AudioUtilities.GetSpeakers()
-        interface = devices.Activate(
-            IAudioEndpointVolume._iid_, CLSCTX_ALL, None)
-        volume = interface.QueryInterface(IAudioEndpointVolume)
-        
-        volume.SetMasterVolumeLevelScalar(level/100, None)
-    except Exception as e:
-        print(f"Erreur lors du réglage du volume : {e}")
 
 
 def decode( room ):
@@ -47,12 +35,25 @@ port = 57542
 
 s.connect( ( decode( input( "room code\n-> " ) ), port ) )
 
-if s.recv( 1024 ).decode() == 'name?':
-    name = input( "name\n-> " )
-    print( name )
-    s.send( name.encode() )
+while True:
+    x = s.recv( 1024 ).decode()
+    if x == "name?":
+        name = input( "name\n-> " )
+        s.send( name.encode() )
+    elif x == "used":
+        print( "name already used" )
+        name = input( "name\n-> " )
+        s.send( name.encode() )
+    elif x == "name_good":
+        break
+    else:
+        print( "error" )
+        exit( 0 )
 
-buzzed = 0
+
+
+
+buzzed = False
 buzzed_list = []
 
 def buzz():
@@ -60,11 +61,9 @@ def buzz():
     global buzzed_list
     while True:
         input()
-        if buzzed == 0:
-            buzzed = 1
+        if not buzzed:
+            buzzed = True
             s.send( 'buzz'.encode() )
-            buzzed_list.append( name )
-            play_mp3()
 
 def revc():
     global buzzed_list
@@ -72,16 +71,20 @@ def revc():
     while True:
         recv = s.recv( 1024 ).decode()
         if recv == 'reset':
-            buzzed = 0
+            buzzed = False
             print( "\n\n"*100 )
             print( "buzz" )
-        elif recv == 0:
+        elif recv.find( "buzzed:" ) == 0:
             recv = recv.replace( 'buzzed:', '' )
             buzzed_list.append( recv )
             print( '\n\n'*100 )
+            print( "player buzzed:" )
             for i in range( len( buzzed_list ) ):
                 print( buzzed_list[i] )
-            print( "buzz" )
+            if len( buzzed_list ) == 1:
+                play_mp3()
+            if not buzzed:
+                print( "buzz" )
 
 
 print( "\n\n"*100 )

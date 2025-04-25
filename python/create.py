@@ -2,16 +2,13 @@ import socket
 import random
 import threading
 import pygame
-from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume
-from comtypes import CLSCTX_ALL
 
 def play_mp3():
     # file = open( "../assets/audio.txt", 'r' )
     # file_path = "../assets/" + file.readline()
     # file.close()
-    file_path = "../assets/shortBuzz.mp3"
+    file_path = "./assets/shortBuzz.mp3"
     try:
-        set_volume( 50 )
         pygame.mixer.init()
         pygame.mixer.music.load(file_path)
         pygame.mixer.music.play()
@@ -22,19 +19,6 @@ def play_mp3():
     finally:
         pygame.mixer.music.stop()
         pygame.mixer.quit()
-
-
-def set_volume( level ):
-    try:
-        devices = AudioUtilities.GetSpeakers()
-        interface = devices.Activate(
-            IAudioEndpointVolume._iid_, CLSCTX_ALL, None)
-        volume = interface.QueryInterface(IAudioEndpointVolume)
-        
-        volume.SetMasterVolumeLevelScalar(level/100, None)
-    except Exception as e:
-        print(f"Erreur lors du réglage du volume : {e}")
-
 
 
 
@@ -100,16 +84,28 @@ already_buzzed = False
 def connect():
     global clients
     global client_threads
+    global client_list
     s.bind( ( '', port ) )
     while True:
         s.listen()
         a, b = s.accept()
         tmp_client = Client( a, b )
         tmp_client.send( "name?" )
-        name = tmp_client.receive()
+        while True:
+            name = tmp_client.receive()
+            verification = False
+            for i in client_list:
+                if name == i:
+                    verification = True
+            if not verification:
+                break
+            else:
+                tmp_client.send( "used" )
+        tmp_client.send( "name_good" )
+
+
         tmp_client.name = name
         clients[name] = tmp_client
-        print( clients )
         client_list.append( name )
         client_threads.append( threading.Thread( target=clients[name].buzz ) )
         client_threads[len( client_threads )-1].start()
@@ -133,5 +129,6 @@ while True:
 
 # ajouter le son - fait
 # vérifier que le joueur buzz une seule fois, même du coté serveur - fait
-# Faire que tout les joueurs savent qui a buzzé - À corriger, il affiche mal une fois buzzé
-# deux joueurs ne peuvent pas avoir le même nom
+# Faire que tout les joueurs savent qui a buzzé - fait
+# deux joueurs ne peuvent pas avoir le même nom - à tester
+# l'hôte ne doit pas crash quand des joueurs déconnectent
