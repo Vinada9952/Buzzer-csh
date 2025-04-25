@@ -109,6 +109,7 @@ def connect():
         name = tmp_client.receive()
         tmp_client.name = name
         clients[name] = tmp_client
+        print( clients )
         client_list.append( name )
         client_threads.append( threading.Thread( target=clients[name].buzz ) )
         client_threads[len( client_threads )-1].start()
@@ -125,6 +126,7 @@ while True:
         print( "player buzzed:" )
         for i in range( len( client_list ) ):
             clients[ client_list[i] ].send( 'reset' )
+            clients[ client_list[i] ].buzzed = 0
         already_buzzed = False
 
 
@@ -132,3 +134,4 @@ while True:
 # ajouter le son - fait
 # vérifier que le joueur buzz une seule fois, même du coté serveur - fait
 # Faire que tout les joueurs savent qui a buzzé - À corriger, il affiche mal une fois buzzé
+# deux joueurs ne peuvent pas avoir le même nom

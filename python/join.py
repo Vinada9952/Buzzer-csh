@@ -63,6 +63,7 @@ def buzz():
         if buzzed == 0:
             buzzed = 1
             s.send( 'buzz'.encode() )
+            buzzed_list.append( name )
             play_mp3()
 
 def revc():
