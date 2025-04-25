@@ -21,11 +21,15 @@ body {
     max-width: 500px;
 }
 
-button {
-    padding: 10px 20px;
+#buzzer {
     background-color: #d9ba32;
-    color: white;
     border: none;
-    border-radius: 5px;
-    cursor: pointer;
+    color: white;
+    padding: 110px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    border-radius: 50%;
 }
