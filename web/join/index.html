@@ -1,10 +1,3 @@
-
-
-
-
-
-
-
 <html>
     <head>
         <meta charset="UTF-8">
@@ -15,10 +8,11 @@
     <body>
         <div id="container">
             
-            <h1 style="color: white;" >Buzzer CSH</h1>
+            <h1 style="color: white;">Buzzer CSH</h1>
 
             <div id="room-code">
                 <input type="text" id="room-code-input" placeholder="Code de la salle" required><br>
+                <input type="text" id="player-name-input" placeholder="Votre nom" required><br>
                 <button id="room-code-submit">Entrer</button>
             </div>
             
@@ -30,15 +24,15 @@
                     <button id="answer-submit">Soumettre</button>
                 </div>
 
-                <h3 style="color: white;">Joueurs ayant buzzé</h2>
+                <h3 style="color: white;">Joueurs ayant buzzé</h3>
                 <div id="players-buzzed" style="color: white;"></div>
-                <h3 style="color: white;">Joueurs</h2>
+                <h3 style="color: white;">Joueurs</h3>
                 <div id="players" style="color: white;"></div>
             </div>
 
         </div>
-
-
-    <script src="scripts.js"></script>
+        
+        <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+        <script src="scripts.js"></script>
     </body>
 </html>
