@@ -23,7 +23,17 @@ body {
 
 button {
     padding: 10px 20px;
-    background-color: #d9ba32;
+    background-color: #cea6eb;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+
+button:hover {
+    padding: 10px 20px;
+    background-color: #c08ae6;
     color: white;
     border: none;
     border-radius: 5px;

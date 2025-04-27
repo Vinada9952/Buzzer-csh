@@ -24,7 +24,7 @@ body {
 
 button {
     padding: 10px 20px;
-    background-color: #bfa42c;
+    background-color: #cea6eb;
     color: white;
     border: none;
     border-radius: 5px;
@@ -34,7 +34,7 @@ button {
 
 button:hover {
     padding: 10px 20px;
-    background-color: #d9ba32;
+    background-color: #c08ae6;
     color: white;
     border: none;
     border-radius: 5px;
@@ -42,7 +42,7 @@ button:hover {
 }
 
 #buzzer {
-    background-color: #bfa42c;
+    background-color: #cea6eb;
     border: none;
     color: white;
     padding: 110px;
@@ -55,7 +55,7 @@ button:hover {
 }
 
 #buzzer:hover {
-    background-color: #d9ba32;
+    background-color: #c08ae6;
     border: none;
     color: white;
     padding: 110px;
