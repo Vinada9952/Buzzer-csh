@@ -6,14 +6,14 @@ body {
     justify-content: center;
     align-items: center;
     height: 100vh;
-    background-color: #00005e;
+    background-color: #292c34;
 }
 
 
 
 #container {
     text-align: center;
-    background: #fff;
+    background: #2e313d;
     padding: 20px;
     border-radius: 10px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
