@@ -1,5 +1,7 @@
 const socket = io("http://localhost:57542");
 
+let buzzed = false;
+
 document.getElementById("room-code-submit").addEventListener("click", startGame);
 
 function startGame() {
@@ -31,5 +33,15 @@ socket.on("player-buzzed", (player) => {
 });
 
 document.getElementById("buzzer").addEventListener("click", () => {
-    socket.emit("buzz");
+    if( !buzzed ) {
+        buzzed = true;
+        socket.emit("buzz");
+    }
+});
+
+socket.on("reset-buzz-state", () => {
+    const buzzedDiv = document.getElementById("players-buzzed");
+    buzzedDiv.innerHTML = ""; // Réinitialiser la liste des joueurs ayant buzzé
+    buzzed = false; // Réinitialiser l'état local
+    console.log("Réinitialisation des buzz reçue !");
 });
