@@ -1,44 +1,56 @@
 const socket = io("http://localhost:57542");
 
+all_buzzed = false;
 
-// Afficher l'adresse IP comme code de salle
-tmp = fetch("http://localhost:57542/get-code")
-    .then(response => response.text())
-    .then(ip => {
-        document.getElementById("room-code").innerText = `Code de salle : ${ip}`;
-        console.log( "room code : ", ip );
-        return ip;
-    });
+c = ""
+n = "host"
+for( let i = 0; i < 4; i++ ) {
+    c += Math.floor( Math.random() * 10 ).toString();
+}
+socket.emit( "create-room", c, n )
 
-
-const n = "host";
-
-    
-console.log( "c : ", c );
-console.log( "n :  ", n );
-socket.emit("join-room", c, n );
-
-
-socket.on( "search-host", () => {
-    console.log( "Hôte connecté" );
-});
+document.getElementById( "room-code" ).innerText += " "+c
 
 // Gérer les événements du serveur
 socket.on("update-players", (players) => {
+    console.log( "update-players", players )
+    document.getElementById("players").innerText = "";
     const playersDiv = document.getElementById("players");
-    playersDiv.innerHTML = players.map(player => `<p>${player}</p>`).join("");
+    for( let i = 0; i < players.length; i++ ) {
+        if( players[i] != "host")
+        {
+            playersDiv.innerText += players[i] + "\n";
+        }
+    }
 });
 
 socket.on("player-buzzed", (player) => {
     const buzzedDiv = document.getElementById("players-buzzed");
-    buzzedDiv.innerHTML += `<p>${player} a buzzé !</p>`;
+    buzzedDiv.innerHTML += `<p>${player}</p>`;
+    if( !all_buzzed )
+    {
+        const audio = new Audio('../../assets/shortBuzz.mp3');
+        audio.play();
+    }
+    all_buzzed = true;
 });
 
 // Boutons pour réinitialiser les états
 document.getElementById("buzz-answer").addEventListener("click", () => {
     socket.emit("reset-buzz");
+    document.getElementById( "players-buzzed" ).innerText = "";
+    all_buzzed = false;
 });
 
 document.getElementById("type-answer").addEventListener("click", () => {
     socket.emit("reset-answer");
+    document.getElementById( "players-buzzed" ).innerText = "";
+    all_buzzed = false;
+});
+
+
+socket.on("player-answer", (player, answer) => {
+    const buzzedDiv = document.getElementById("players-buzzed");
+    buzzedDiv.innerHTML += `<p>${player} a répondu ${answer}</p>`;
+    all_buzzed = true;
 });

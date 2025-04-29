@@ -1,7 +1,9 @@
 const socket = io("http://localhost:57542");
 
-let buzzed = false;
+buzzed = false;
+console.log( "buzzed : ", buzzed );
 playerName = "";
+all_buzzed = false;
 
 document.getElementById("room-code-submit").addEventListener("click", startGame);
 
@@ -32,7 +34,7 @@ socket.on("update-players", (players) => {
     for( let i = 0; i < players.length; i++ ) {
         if( players[i] != "host")
         {
-            playersDiv.innerHTML += "\n"+players[i];
+            playersDiv.innerText += players[i] + "\n";
         }
     }
 });
@@ -40,19 +42,57 @@ socket.on("update-players", (players) => {
 socket.on("player-buzzed", (player) => {
     const buzzedDiv = document.getElementById("players-buzzed");
     buzzedDiv.innerHTML += `<p>${player}</p>`;
+    console.log( "player : ", player );
+    if( !all_buzzed )
+    {
+        const audio = new Audio('../../assets/shortBuzz.mp3');
+        audio.play();
+    }
+    all_buzzed = true;
+});
+
+socket.on("player-answer", (player, answer) => {
+    const buzzedDiv = document.getElementById("players-buzzed");
+    buzzedDiv.innerHTML += `<p>${player}</p>`;
+    all_buzzed = true;
 });
 
 document.getElementById("buzzer").addEventListener("click", () => {
     if( !buzzed ) {
         buzzed = true;
+        console.log( "buzzed : ", buzzed );
         socket.emit("buzz", playerName);
         console.log("Buzz envoyé !");
     }
 });
 
+document.getElementById( "answer-submit" ).addEventListener("click", () => {
+    answer = document.getElementById( "answer-input" ).value;
+    if( answer.trim() === "" ) {
+        alert( "Veuillez entrer une réponse valide." );
+        return;
+    }
+    socket.emit( "answer", answer )
+});
+
 socket.on("reset-buzz-state", () => {
-    const buzzedDiv = document.getElementById("players-buzzed");
-    buzzedDiv.innerHTML = ""; // Réinitialiser la liste des joueurs ayant buzzé
+    document.getElementById("players-buzzed").innerText = "";
+    document.getElementById("buzz-answer").style.display = "block";
+    document.getElementById("type-answer").style.display = "none";
     buzzed = false; // Réinitialiser l'état local
+    console.log( "buzzed : ", buzzed );
     console.log("Réinitialisation des buzz reçue !");
+    all_buzzed = false;
+});
+
+
+socket.on("reset-answer-state", () => {
+    document.getElementById("players-buzzed").innerText = "";
+    document.getElementById("buzz-answer").style.display = "none";
+    document.getElementById("type-answer").style.display = "block";
+    document.getElementById( "answer-input" ).value = "";
+    buzzed = false; // Réinitialiser l'état local
+    console.log( "buzzed : ", buzzed );
+    console.log("Réinitialisation des buzz reçue !");
+    all_buzzed = false;
 });
