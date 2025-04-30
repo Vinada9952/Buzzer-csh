@@ -77,6 +77,8 @@ document.getElementById("buzzer").addEventListener("click", () => {
         console.log( "buzzed : ", buzzed );
         socket.emit("buzz", playerName);
         console.log("Buzz envoyé !");
+        document.getElementById( "no-buzzed" ).style.display = "none";
+        document.getElementById( "buzzed" ).style.display = "block";
     }
 });
 
@@ -93,6 +95,8 @@ socket.on("reset-buzz-state", () => {
     document.getElementById("players-buzzed").innerText = "";
     document.getElementById("buzz-answer").style.display = "block";
     document.getElementById("type-answer").style.display = "none";
+    document.getElementById( "no-buzzed" ).style.display = "block";
+    document.getElementById( "buzzed" ).style.display = "none";
     buzzed = false; // Réinitialiser l'état local
     console.log( "buzzed : ", buzzed );
     console.log("Réinitialisation des buzz reçue !");

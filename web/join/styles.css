@@ -67,6 +67,23 @@ button:hover {
     border-radius: 50%;
 }
 
+#buzzed {
+    display: none;
+}
+
+#buzzer-buzzed {
+    background-color: #292c34;
+    border: none;
+    color: white;
+    padding: 110px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    border-radius: 50%;
+}
+
 input {
     width: 80%;
     padding: 10px;
