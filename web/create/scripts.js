@@ -1,4 +1,4 @@
-const socket = io("http://localhost:57542");
+const socket = io("http://172.22.1.110:57542");
 
 all_buzzed = false;
 
