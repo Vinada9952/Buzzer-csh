@@ -2,18 +2,18 @@ const socket = io("http://localhost:57542");
 
 all_buzzed = false;
 
-c = ""
-n = "host"
+c = "";
+n = "host";
 for( let i = 0; i < 4; i++ ) {
     c += Math.floor( Math.random() * 10 ).toString();
 }
-socket.emit( "create-room", c, n )
+socket.emit( "create-room", c, n );
 
-document.getElementById( "room-code" ).innerText += " "+c
+document.getElementById( "room-code" ).innerText += " "+c;
 
 // Gérer les événements du serveur
 socket.on("update-players", (players) => {
-    console.log( "update-players", players )
+    console.log( "update-players", players );
     document.getElementById("players").innerText = "";
     const playersDiv = document.getElementById("players");
     for( let i = 0; i < players.length; i++ ) {
@@ -53,4 +53,8 @@ socket.on("player-answer", (player, answer) => {
     const buzzedDiv = document.getElementById("players-buzzed");
     buzzedDiv.innerHTML += `<p>${player} a répondu ${answer}</p>`;
     all_buzzed = true;
+});
+
+socket.on( "room-used", () => {
+    location.reload();
 });
