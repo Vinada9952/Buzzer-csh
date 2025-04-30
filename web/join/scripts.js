@@ -30,12 +30,26 @@ function startGame() {
 // Gérer les événements du serveur
 socket.on("update-players", (players) => {
     console.log( "update-players", players )
+    document.getElementById("players").innerText = "";
     const playersDiv = document.getElementById("players");
     for( let i = 0; i < players.length; i++ ) {
         if( players[i] != "host")
         {
             playersDiv.innerText += players[i] + "\n";
         }
+    }
+
+    ver = true;
+    for( let i = 0; i < players.length; i++ ) {
+        if( players[i] == "host" )
+        {
+            ver = false;
+        }
+    }
+    console.log( ver )
+    if( ver ) {
+        console.log( "reload" );
+        location.reload();
     }
 });
 
@@ -96,3 +110,9 @@ socket.on("reset-answer-state", () => {
     console.log("Réinitialisation des buzz reçue !");
     all_buzzed = false;
 });
+
+
+socket.on( "name-used", () => {
+    alert( "nom déjà utilisé, veuillez en trouver un autre" );
+    location.reload();
+} );
