@@ -59,7 +59,7 @@ socket.on("player-buzzed", (player) => {
     console.log( "player : ", player );
     if( !all_buzzed )
     {
-        const audio = new Audio('../../assets/shortBuzz.mp3');
+        const audio = new Audio('https://cdn.glitch.global/fff151b3-947e-47f6-9965-3a1e4ae8d6ea/shortBuzz.mp3?v=1746032493487');
         audio.play();
     }
     all_buzzed = true;
