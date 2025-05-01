@@ -6,11 +6,12 @@ const app = express();
 const path = require('path');
 app.use(express.static(path.join(__dirname, 'web')))
 
-app.listen( 3000, () => {
+port = 3000;
+app.listen( port, () => {
 
 
 
-    console.log( "\n\n\n\n\n\n\n\n\n\n\n\n" );
+    console.log( "port", port, "\n\n\n\n\n\n\n\n\n\n\n\n" );
 
 
     // Configurer Socket.IO pour utiliser le serveur HTTP
