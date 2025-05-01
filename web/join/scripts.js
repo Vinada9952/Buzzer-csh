@@ -1,4 +1,4 @@
-const socket = io("https://buzzer-csh.onrender.com/");
+const socket = io("https://localhost:57542");
 
 buzzed = false;
 console.log( "buzzed : ", buzzed );
