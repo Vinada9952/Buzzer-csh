@@ -1,6 +1,10 @@
 const { Server } = require("socket.io");
 const http = require("http");
 const server = http.createServer();
+const express = require('express');
+const path = require('path');
+
+app.use(express.static(path.join(__dirname, 'web')))
 
 console.log( "\n\n\n\n\n\n\n\n\n\n\n\n" );
 
