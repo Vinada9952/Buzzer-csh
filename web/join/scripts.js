@@ -1,4 +1,4 @@
-const socket = io("http://localhost:57542");
+const socket = io("http://192.168.0.113:57542");
 
 buzzed = false;
 console.log( "buzzed : ", buzzed );
