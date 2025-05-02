@@ -36,7 +36,7 @@ socket.on("update-players", (players) => {
     for( let i = 0; i < players.length; i++ ) {
         if( players[i] != "host")
         {
-            playersDiv.innerText += "\n" + players[i] + "\n";
+            playersDiv.innerText += players[i]+"\n";
         }
     }
 
