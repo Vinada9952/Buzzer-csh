@@ -1,13 +1,27 @@
+console.log( 1 );
 const { Server } = require("socket.io");
+console.log( 2 );
 const http = require("http");
-const server = http.createServer();
+console.log( 3 );
 const express = require('express');
+console.log( 4 );
 const path = require('path');
-const app = require('app');
+console.log( 5 );
+const server = http.createServer();
+console.log( 6 );
+const app = express()
+console.log( 7 );
+
 
 app.use(express.static(path.join(__dirname, 'web')));
 
-port = 3000;
+const port = 3000;
+const io = new Server(server, {
+    cors: {
+        origin: "*", // Autoriser toutes les origines
+        methods: ["GET", "POST"], // Autoriser les méthodes HTTP spécifiques
+    },
+});
 
 app.listen( port, () => {
 
@@ -17,12 +31,7 @@ app.listen( port, () => {
 
 
     // Configurer Socket.IO pour utiliser le serveur HTTP
-    const io = new Server(server, {
-        cors: {
-            origin: "*", // Autoriser toutes les origines
-            methods: ["GET", "POST"], // Autoriser les méthodes HTTP spécifiques
-        },
-    });
+    
 
     const rooms = {}; // Stocker les salles et leurs joueurs
     const playerNames = {}; // Associer les sockets aux noms des joueurs
