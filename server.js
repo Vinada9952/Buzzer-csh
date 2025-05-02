@@ -20,7 +20,7 @@ const io = new Server(server, {
 // Servir les fichiers statiques
 app.use(express.static(path.join(__dirname, 'web')));
 
-const port = process.env.PORT;
+const port = process.env.PORT || 3000;
 // server.listen(port, () => {
 //     console.log(`Serveur en cours d'exécution sur le port ${port}`);
 // });
