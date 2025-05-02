@@ -85,8 +85,11 @@ document.getElementById("buzzer").addEventListener("click", () => {
 document.getElementById( "answer-submit" ).addEventListener("click", () => {
     answer = document.getElementById( "answer-input" ).value;
     if( answer.trim() === "" ) {
-        alert( "Veuillez entrer une réponse valide." );
-        return;
+        if( !buzzed ) {
+            buzzed = true;
+            alert( "Veuillez entrer une réponse valide." );
+            return;
+        }
     }
     socket.emit( "answer", answer )
 });
