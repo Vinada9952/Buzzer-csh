@@ -19,7 +19,7 @@ socket.on("update-players", (players) => {
     for( let i = 0; i < players.length; i++ ) {
         if( players[i] != "host")
         {
-            playersDiv.innerText += players[i] + "\n";
+            playersDiv.innerText += "\n" + players[i] + "\n";
         }
     }
 });
@@ -51,7 +51,7 @@ document.getElementById("type-answer").addEventListener("click", () => {
 
 socket.on("player-answer", (player, answer) => {
     const buzzedDiv = document.getElementById("players-buzzed");
-    buzzedDiv.innerHTML += `<p>${player} a répondu ${answer}</p>`;
+    buzzedDiv.innerHTML += `<p>${player} a répondu : ${answer}</p>`;
     all_buzzed = true;
 });
 

@@ -35,7 +35,7 @@ socket.on("update-players", (players) => {
     for( let i = 0; i < players.length; i++ ) {
         if( players[i] != "host")
         {
-            playersDiv.innerText += players[i] + "\n";
+            playersDiv.innerText += "\n" + players[i] + "\n";
         }
     }
 
@@ -118,5 +118,9 @@ socket.on("reset-answer-state", () => {
 
 socket.on( "name-used", () => {
     alert( "nom déjà utilisé, veuillez en trouver un autre" );
+    location.reload();
+} );
+
+socket.on( "delete-room", () => {
     location.reload();
 } );
