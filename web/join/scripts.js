@@ -1,9 +1,10 @@
-const socket = io("http://192.168.0.113:57542");
+const socket = io("http://localhost:57542");
 
 buzzed = false;
 console.log( "buzzed : ", buzzed );
 playerName = "";
 all_buzzed = false;
+type = "buzz";
 
 document.getElementById("room-code-submit").addEventListener("click", startGame);
 
@@ -85,13 +86,17 @@ document.getElementById("buzzer").addEventListener("click", () => {
 document.getElementById( "answer-submit" ).addEventListener("click", () => {
     answer = document.getElementById( "answer-input" ).value;
     if( answer.trim() === "" ) {
-        alert( "Veuillez entrer une réponse valide." );
-        return;
+        if( !buzzed ) {
+            buzzed = true;
+            alert( "Veuillez entrer une réponse valide." );
+            return;
+        }
     }
     socket.emit( "answer", answer )
 });
 
 socket.on("reset-buzz-state", () => {
+    type = "buzz";
     document.getElementById("players-buzzed").innerText = "";
     document.getElementById("buzz-answer").style.display = "block";
     document.getElementById("type-answer").style.display = "none";
@@ -105,6 +110,7 @@ socket.on("reset-buzz-state", () => {
 
 
 socket.on("reset-answer-state", () => {
+    type = "answer";
     document.getElementById("players-buzzed").innerText = "";
     document.getElementById("buzz-answer").style.display = "none";
     document.getElementById("type-answer").style.display = "block";
@@ -124,3 +130,22 @@ socket.on( "name-used", () => {
 socket.on( "delete-room", () => {
     location.reload();
 } );
+
+
+document.addEventListener('keydown', function(event) {
+    console.log( event.keyCode );
+    console.log( type );
+    console.log( buzzed );
+    if( event.keyCode == 32 ) {
+        if( type == "buzz" ) {
+            if( !buzzed ) {
+                buzzed = true;
+                console.log( "buzzed : ", buzzed );
+                socket.emit("buzz", playerName);
+                console.log("Buzz envoyé !");
+                document.getElementById( "no-buzzed" ).style.display = "none";
+                document.getElementById( "buzzed" ).style.display = "block";
+            }
+        }
+    }
+});
