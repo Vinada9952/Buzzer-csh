@@ -123,4 +123,4 @@ socket.on( "name-used", () => {
 
 socket.on( "delete-room", () => {
     location.reload();
-} ); 
+} );
