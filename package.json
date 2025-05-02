@@ -2,7 +2,8 @@
   "dependencies": {
     "socket.io": "^4.8.1",
     "express": "^5.1.0",
-    "path": "^0.12.7"
+    "path": "^0.12.7",
+    "app": "0.1.0"
   },
   
   "script": {
