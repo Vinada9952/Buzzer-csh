@@ -6,4 +6,4 @@
       "include": ["server.js"]
     },
     "throttle": 1000
-  }
+}

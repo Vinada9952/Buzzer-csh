@@ -1,20 +1,15 @@
 console.log( 1 );
-const { Server } = require("socket.io");
-console.log( 2 );
-const http = require("http");
-console.log( 3 );
 const express = require('express');
+console.log( 2 );
+const http = require('http');
+console.log( 3 );
+const { Server } = require('socket.io');
 console.log( 4 );
 const path = require('path');
-
-console.log( "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n" )
+console.log( 5 );
 
 const app = express();
 const server = http.createServer(app);
-
-app.use(express.static(path.join(__dirname, 'web')));
-
-const port = process.env.PORT || 3000; // Utiliser un port dynamique pour Glitch
 const io = new Server(server, {
     cors: {
         origin: "*",
@@ -22,10 +17,18 @@ const io = new Server(server, {
     },
 });
 
+// Servir les fichiers statiques
+app.use(express.static(path.join(__dirname, 'web')));
+
+const port = process.env.PORT;
+// server.listen(port, () => {
+//     console.log(`Serveur en cours d'exécution sur le port ${port}`);
+// });
+
 const rooms = {}; // Stocker les salles et leurs joueurs
 const playerNames = {}; // Associer les sockets aux noms des joueurs
 
-io.on("connection", (socket) => {
+io.on('connection', (socket) => {
     console.log("Un client s'est connecté");
 
         socket.on("join-room", ( roomCode, playerName ) => {
@@ -38,17 +41,17 @@ io.on("connection", (socket) => {
             return;
         }
 
-            console.log( "PlayerNames : ", playerNames );
-            if( Object.values(playerNames).includes(playerName) )
-            {
-                socket.emit( "name-used" );
-            }
-            else
-            {
+        console.log( "PlayerNames : ", playerNames );
+        if( Object.values(playerNames).includes(playerName) )
+        {
+            socket.emit( "name-used" );
+        }
+        else
+        {
             rooms[roomCode].push(socket.id);
-                playerNames[socket.id] = playerName; // Associer le nom au socket
-                socket.join(roomCode); // Joindre le socket à la salle
-                console.log(`${playerName} a rejoint la salle : ${roomCode}`);
+            playerNames[socket.id] = playerName; // Associer le nom au socket
+            socket.join(roomCode); // Joindre le socket à la salle
+            console.log(`${playerName} a rejoint la salle : ${roomCode}`);
 
             const players = rooms[roomCode].map(id => playerNames[id]);
             io.to(roomCode).emit("update-players", players);
