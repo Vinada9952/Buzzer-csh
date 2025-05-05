@@ -1,13 +1,123 @@
-const socket = io("http://localhost:57542");
+const { Server } = require("socket.io");
+const http = require("http");
+const server = http.createServer();
+const os = require('os');
+
+
+function getLocalIPAddress() {
+    const networkInterfaces = os.networkInterfaces();
+    for (const interfaceName in networkInterfaces) {
+        const addresses = networkInterfaces[interfaceName];
+        for (const address of addresses) {
+            if (address.family === 'IPv4' && !address.internal) {
+                return address.address; // Retourne l'adresse IP locale
+            }
+        }
+    }
+    return 'Adresse IP non trouvée';
+}
+
+
+const io = new Server(server, {
+    cors: {
+        origin: "*", // Autoriser toutes les origines
+        methods: ["GET", "POST"], // Autoriser les méthodes HTTP spécifiques
+    },
+});
+
+const playerNames = {}; // Associer les sockets aux noms des joueurs
+room = "a"
 
 all_buzzed = false;
 
-c = "";
-n = "host";
-for( let i = 0; i < 4; i++ ) {
-    c += Math.floor( Math.random() * 10 ).toString();
-}
-socket.emit( "create-room", c, n );
+
+io.on("connection", (socket) => {
+    console.log("Un client s'est connecté");
+
+    socket.on("join-room", ( playerName ) => {
+
+        console.log(`Requête de connexion à la salle avec le nom : ${playerName}`);
+
+        console.log( "PlayerNames : ", playerNames );
+        if( Object.values(playerNames).includes(playerName) )
+        {
+            socket.emit( "name-used" );
+        }
+        else
+        {
+            rooms[roomCode].push(socket.id);
+            playerNames[socket.id] = playerName; // Associer le nom au socket
+            socket.join(roomCode); // Joindre le socket à la salle
+            console.log(`${playerName} a rejoint la salle : ${roomCode}`);
+        
+            // Envoyer la liste des joueurs à tous les clients de la salle
+            const players = rooms[roomCode].map(id => playerNames[id]);
+            io.to(roomCode).emit("update-players", players);
+        }
+    });
+    
+
+    socket.on("buzz", () => {
+        const roomCode = Object.keys(rooms).find(code => rooms[code].includes(socket.id));
+        if (roomCode) {
+            const playerName = playerNames[socket.id];
+            io.to(roomCode).emit("player-buzzed", `${playerName} a buzzé !`);
+        }
+    });
+    
+    socket.on( "answer", ( answer ) => {
+        const roomCode = Object.keys(rooms).find(code => rooms[code].includes(socket.id));
+        if (roomCode) {
+            const playerName = playerNames[socket.id];
+            io.to(roomCode).emit("player-answer",playerName, answer);
+        }
+    });
+
+    socket.on("reset-buzz", () => {
+        console.log("Réinitialisation des buzz !");
+        const roomCode = Object.keys(rooms).find(code => rooms[code].includes(socket.id));
+        console.log(`Room code: ${roomCode}`);
+        if (roomCode) {
+            io.to(roomCode).emit("reset-buzz-state"); // Événement spécifique pour réinitialiser
+            console.log(`Événement reset-buzz-state émis à la salle : ${roomCode}`);
+        }
+    });
+
+    socket.on("reset-answer", () => {
+        console.log("Réinitialisation des buzz !");
+        const roomCode = Object.keys(rooms).find(code => rooms[code].includes(socket.id));
+        console.log(`Room code: ${roomCode}`);
+        if (roomCode) {
+            io.to(roomCode).emit("reset-answer-state"); // Événement spécifique pour réinitialiser
+            console.log(`Événement reset-answer-state émis à la salle : ${roomCode}`);
+        }
+    });
+
+    socket.on("disconnect", () => {
+        console.log("Un client s'est déconnecté");
+        for (const roomCode in rooms) {
+            rooms[roomCode] = rooms[roomCode].filter(id => id !== socket.id);
+            player = playerNames[socket.id];
+            delete playerNames[socket.id];
+            if( player == "host" )
+            {
+                io.to(roomCode).emit( "delete-room" );
+                delete rooms[roomCode];
+            }
+            else
+            {
+                const players = rooms[roomCode].map(id => playerNames[id]);
+                io.to(roomCode).emit("update-players", players);
+            }
+        }
+    });
+});
+
+// Démarrer le serveur HTTP et Socket.IO
+server.listen(57542, () => {
+    console.log("Serveur en cours d'exécution sur le port 57542");
+});
+
 
 document.getElementById( "room-code" ).innerText += " "+c;
 
