@@ -1,3 +1,14 @@
+from flask import Flask
+
+app = Flask(__name__)
+
+@app.route('/')
+def main_menu():
+    return Pages.MAIN_PAGE
+
+
+class Pages:
+    MAIN_PAGE = """
 <!DOCTYPE html>
 <html lang="fr">
     <head>
@@ -75,4 +86,4 @@
                 };
             </script>
     </body>
-</html>
+</html>"""
