@@ -4,7 +4,49 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Buzzer CSH</title>
-        <link rel="stylesheet" href="styles.css">
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                margin: 0;
+                padding: 0;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                height: 100vh;
+                background-color: #292c34;
+            }
+
+
+
+            #container {
+                text-align: center;
+                background: #2e313d;
+                padding: 20px;
+                border-radius: 10px;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                width: 90%;
+                max-width: 500px;
+            }
+
+            button {
+                padding: 10px 20px;
+                background-color: #cea6eb;
+                color: white;
+                border: none;
+                border-radius: 5px;
+                cursor: pointer;
+            }
+
+
+            button:hover {
+                padding: 10px 20px;
+                background-color: #c08ae6;
+                color: white;
+                border: none;
+                border-radius: 5px;
+                cursor: pointer;
+            }
+        </style>
     </head>
     <body>
             <div id="container">
@@ -13,12 +55,12 @@
                 <button id="create-button">Créer une salle</button>
             </div> 
             <script>
-                document.getElementById("join-button").addEventListener("click", function() {
-                    window.location.href = "join/index.html";
-                });
-                document.getElementById("create-button").addEventListener("click", function() {
-                    window.location.href = "create/index.html";
-                });
+                document.getElementById('join-button').onclick = function() {
+                    window.location.href = 'http://192.168.0.110:9952/join';
+                };
+                document.getElementById('create-button').onclick = function() {
+                    window.location.href = 'http://192.168.0.110:9952/create';
+                };
             </script>
     </body>
 </html>

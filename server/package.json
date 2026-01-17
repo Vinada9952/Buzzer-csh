@@ -1,8 +1,0 @@
-{
-  "dependencies": {
-    "socket.io": "^4.8.1"
-  },
-  "script": {
-    "start": "node server.js"
-  }
-}
