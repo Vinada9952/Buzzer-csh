@@ -56,22 +56,10 @@
             </div> 
             <script>
                 document.getElementById('join-button').onclick = function() {
-                    fetch('<SERVER ADRESS>', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({action: "join"})
-                    });
+                    window.location.href = 'http://192.168.0.110:9952/join';
                 };
                 document.getElementById('create-button').onclick = function() {
-                    fetch('<SERVER ADRESS>', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({action: "create"})
-                    });
+                    window.location.href = 'http://192.168.0.110:9952/create';
                 };
             </script>
     </body>
