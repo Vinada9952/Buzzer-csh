@@ -119,8 +119,14 @@
                         alert("Erreur lors de la récupération de la salle !");
                         return;
                     }
-                    document.getElementById('players-buzzed').innerHTML = data.buzzed_players.map(player => `<div>${player.name + " : " + player.answer}<br></div>`).join('');
-                    document.getElementById('players').innerHTML = data.players.map(player => `<div>${player}</div>`).join('');
+                    if( data.type == "text" ) {
+                        document.getElementById('players-buzzed').innerHTML = data.buzzed_players.map(player => `<div>${player.name + " : " + player.answer}<br></div>`).join('');
+                        document.getElementById('players').innerHTML = data.players.map(player => `<div>${player}</div>`).join('');
+                    }
+                    if( data.type == "button" ) {
+                        document.getElementById('players-buzzed').innerHTML = data.buzzed_players.map(player => `<div>${player.name}<br></div>`).join('');
+                        document.getElementById('players').innerHTML = data.players.map(player => `<div>${player}</div>`).join('');
+                    }
                 })
                 .catch(error => console.error('Erreur:', error));
             }, 100);
