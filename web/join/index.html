@@ -4,7 +4,110 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Buzzer CSH</title>
-        <link rel="stylesheet" href="styles.css">
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                margin: 0;
+                padding: 0;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                height: 100vh;
+                background-color: #292c34;
+            }
+
+
+
+            #container {
+                text-align: center;
+                background: #2e313d;
+                padding: 20px;
+                border-radius: 10px;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                width: 90%;
+                max-width: 500px;
+            }
+
+
+            button {
+                padding: 10px 20px;
+                background-color: #cea6eb;
+                color: white;
+                border: none;
+                border-radius: 5px;
+                cursor: pointer;
+            }
+
+
+            button:hover {
+                padding: 10px 20px;
+                background-color: #c08ae6;
+                color: white;
+                border: none;
+                border-radius: 5px;
+                cursor: pointer;
+            }
+
+            #buzzer {
+                background-color: #cea6eb;
+                border: none;
+                color: white;
+                padding: 110px;
+                text-align: center;
+                text-decoration: none;
+                display: inline-block;
+                font-size: 16px;
+                margin: 4px 2px;
+                border-radius: 50%;
+            }
+
+            #buzzer:hover {
+                background-color: #c08ae6;
+                border: none;
+                color: white;
+                padding: 110px;
+                text-align: center;
+                text-decoration: none;
+                display: inline-block;
+                font-size: 16px;
+                margin: 4px 2px;
+                border-radius: 50%;
+            }
+
+            #buzzed {
+                display: none;
+            }
+
+            #buzzer-buzzed {
+                background-color: #292c34;
+                border: none;
+                color: white;
+                padding: 110px;
+                text-align: center;
+                text-decoration: none;
+                display: inline-block;
+                font-size: 16px;
+                margin: 4px 2px;
+                border-radius: 50%;
+            }
+
+            input {
+                width: 80%;
+                padding: 10px;
+                margin: 10px 0;
+                border: 1px solid #ccc;
+                border-radius: 5px;
+            }
+
+
+            #in-game {
+                display: none;
+            }
+
+            #type-answer {
+                display: none;
+            }
+        </style>
     </head>
     <body>
         <div id="container">
@@ -37,10 +140,62 @@
                 <h2 style="color: white;">Joueurs</h2>
                 <div id="players" style="color: white;"></div>
             </div>
-
         </div>
-        
-        <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
-        <script src="scripts.js"></script>
+        <script>
+            globalThis.room_code = 0;
+            globalThis.player_name = "";
+            document.getElementById('room-code-submit').onclick = function() {
+                room_code = parseInt( document.getElementById('room-code-input').value );
+                player_name = document.getElementById('player-name-input').value;
+
+                fetch('http://192.168.0.110:9952/join-room', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ code: room_code, name: player_name }),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if( data.valid_code == false ) {
+                        alert("Code de salle invalide !");
+                        return;
+                    }
+                    if( data.valid_name == false ) {
+                        alert("Nom invalide !");
+                        return;
+                    }
+                    document.getElementById('room-code').style.display = 'none';
+                    document.getElementById('in-game').style.display = 'block';
+                })
+                .catch(error => console.error('Erreur:', error));
+            };
+
+            document.getElementById('buzzer').onclick = function() {
+                document.getElementById('no-buzzed').style.display = 'none';
+                document.getElementById('buzzed').style.display = 'block';
+                fetch('http://192.168.0.110:9952/buzz', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ code: room_code, player: player_name, time: Date.now() }),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if( data.valid_code == false ) {
+                        alert("Code de salle invalide !");
+                        return;
+                    }
+                    if( data.valid_name == false ) {
+                        alert("Nom invalide !");
+                        return;
+                    }
+                    document.getElementById('room-code').style.display = 'none';
+                    document.getElementById('in-game').style.display = 'block';
+                })
+                .catch(error => console.error('Erreur:', error));
+            };
+        </script>
     </body>
 </html>

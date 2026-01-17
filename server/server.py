@@ -1,11 +1,11 @@
-from flask import Flask
+from flask import Flask, request
 import random
 
 app = Flask(__name__)
 
 room_example = {
     "code": 9952,
-    "state": "reset", # reset : No one buzzed. buzzes : someone buzzed
+    "state": "reset", # reset : No one buzzed. buzzed : someone buzzed
     "type": "button", # button : buzzing button. text : text input
     "buzzed_players": [
         {
@@ -46,7 +46,89 @@ def create_room():
         "players": []
     }
     rooms.append( new_room )
+    print( rooms )
     return new_room
+
+@app.route( "/join-room", methods=["POST"] )
+def join_room():
+    global rooms
+    json = None
+    try:
+        json = request.get_json( force=True )
+    except Exception as e:
+        print("Erreur JSON :", e)
+        return {"error": "invalid JSON"}, 400
+    
+    code = json.get("code")
+    name = json.get("name")
+    return_json = {
+        "valid_code": False,
+        "valid_name": True
+    }
+
+    for room in rooms:
+        if room["code"] == code:
+            return_json["valid_code"] = True
+            for player in room["players"]:
+                if player == name:
+                    return_json["valid_name"] = False
+            for player in room["buzzed_players"]:
+                if player["name"] == name:
+                    return_json["valid_name"] = False
+    
+    if return_json["valid_code"] and return_json["valid_name"]:
+        for room in rooms:
+            if room["code"] == code:
+                room["players"].append( name )
+                break
+    
+    print( rooms )
+    return return_json
+
+@app.route( "/get_room", methods=["POST"] )
+def get_room():
+    json = None
+    try:
+        json = request.get_json( force=True )
+    except Exception as e:
+        print("Erreur JSON :", e)
+        return {"error": "invalid JSON"}, 400
+
+    code = json.get("code")
+    for room in rooms:
+        if room["code"] == code:
+            return room
+    return {"error": "room not found"}, 404
+
+@app.route( "/buzz", methods=["POST"] )
+def buzz():
+    json = None
+    try:
+        json = request.get_json( force=True )
+    except Exception as e:
+        print("Erreur JSON :", e)
+        return {"error": "invalid JSON"}, 400
+    
+    print( "BUZZ" )
+    print( json )
+    room_code = json.get("code")
+    player_name = json.get("player")
+    time_buzz = json.get("time")
+    for room in rooms:
+        if room["code"] == room_code:
+            room["buzzed_players"].append(
+                {
+                    "name": player_name,
+                    "answer": "",
+                    "timestamp_buzz": time_buzz
+                }
+            )
+            room["state"] = "buzzed"
+            print( "remove", player_name, "from", room["players"] )
+            room["players"].remove( player_name )
+            room["buzzed_players"].sort( key=lambda x: x["timestamp_buzz"] )
+    print( rooms )
+    return {"success": True}
 
 class Pages:
     MAIN_PAGE = """<!DOCTYPE html>
@@ -195,8 +277,207 @@ class Pages:
         </script>
     </body>
 </html>"""
-    JOIN_PAGE = """
-"""
+    JOIN_PAGE = """<!DOCTYPE html>
+<html lang="fr">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Buzzer CSH</title>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                margin: 0;
+                padding: 0;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                height: 100vh;
+                background-color: #292c34;
+            }
+
+
+
+            #container {
+                text-align: center;
+                background: #2e313d;
+                padding: 20px;
+                border-radius: 10px;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                width: 90%;
+                max-width: 500px;
+            }
+
+
+            button {
+                padding: 10px 20px;
+                background-color: #cea6eb;
+                color: white;
+                border: none;
+                border-radius: 5px;
+                cursor: pointer;
+            }
+
+
+            button:hover {
+                padding: 10px 20px;
+                background-color: #c08ae6;
+                color: white;
+                border: none;
+                border-radius: 5px;
+                cursor: pointer;
+            }
+
+            #buzzer {
+                background-color: #cea6eb;
+                border: none;
+                color: white;
+                padding: 110px;
+                text-align: center;
+                text-decoration: none;
+                display: inline-block;
+                font-size: 16px;
+                margin: 4px 2px;
+                border-radius: 50%;
+            }
+
+            #buzzer:hover {
+                background-color: #c08ae6;
+                border: none;
+                color: white;
+                padding: 110px;
+                text-align: center;
+                text-decoration: none;
+                display: inline-block;
+                font-size: 16px;
+                margin: 4px 2px;
+                border-radius: 50%;
+            }
+
+            #buzzed {
+                display: none;
+            }
+
+            #buzzer-buzzed {
+                background-color: #292c34;
+                border: none;
+                color: white;
+                padding: 110px;
+                text-align: center;
+                text-decoration: none;
+                display: inline-block;
+                font-size: 16px;
+                margin: 4px 2px;
+                border-radius: 50%;
+            }
+
+            input {
+                width: 80%;
+                padding: 10px;
+                margin: 10px 0;
+                border: 1px solid #ccc;
+                border-radius: 5px;
+            }
+
+
+            #in-game {
+                display: none;
+            }
+
+            #type-answer {
+                display: none;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="container">
+            
+            <h1 style="color: white;">Buzzer CSH</h1>
+
+            <div id="room-code">
+                <input type="text" id="room-code-input" placeholder="Code de la salle" required><br>
+                <input type="text" id="player-name-input" placeholder="Votre nom" required><br>
+                <button id="room-code-submit">Entrer</button>
+            </div>
+            
+            <div id="in-game">
+                <div id="buzz-answer">
+                    <div id="no-buzzed">
+                        <button id="buzzer">Buzz</button>
+                    </div>
+                    <div id="buzzed">
+                        <button id="buzzer-buzzed">Buzzed</button>
+                    </div>
+                </div>
+
+                <div id="type-answer">
+                    <input type="text" id="answer-input" placeholder="Entrez votre réponse" required><br>
+                    <button id="answer-submit">Soumettre</button>
+                </div>
+
+                <h2 style="color: white;">Joueurs ayant buzzé</h2>
+                <div id="players-buzzed" style="color: white;"></div>
+                <h2 style="color: white;">Joueurs</h2>
+                <div id="players" style="color: white;"></div>
+            </div>
+        </div>
+        <script>
+            globalThis.room_code = 0;
+            globalThis.player_name = "";
+            document.getElementById('room-code-submit').onclick = function() {
+                room_code = parseInt( document.getElementById('room-code-input').value );
+                player_name = document.getElementById('player-name-input').value;
+
+                fetch('http://192.168.0.110:9952/join-room', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ code: room_code, name: player_name }),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if( data.valid_code == false ) {
+                        alert("Code de salle invalide !");
+                        return;
+                    }
+                    if( data.valid_name == false ) {
+                        alert("Nom invalide !");
+                        return;
+                    }
+                    document.getElementById('room-code').style.display = 'none';
+                    document.getElementById('in-game').style.display = 'block';
+                })
+                .catch(error => console.error('Erreur:', error));
+            };
+
+            document.getElementById('buzzer').onclick = function() {
+                document.getElementById('no-buzzed').style.display = 'none';
+                document.getElementById('buzzed').style.display = 'block';
+                fetch('http://192.168.0.110:9952/buzz', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ code: room_code, player: player_name, time: Date.now() }),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if( data.valid_code == false ) {
+                        alert("Code de salle invalide !");
+                        return;
+                    }
+                    if( data.valid_name == false ) {
+                        alert("Nom invalide !");
+                        return;
+                    }
+                    document.getElementById('room-code').style.display = 'none';
+                    document.getElementById('in-game').style.display = 'block';
+                })
+                .catch(error => console.error('Erreur:', error));
+            };
+        </script>
+    </body>
+</html>"""
 
 if __name__ == '__main__':
     app.run( host='192.168.0.110', port=9952 )
