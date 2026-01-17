@@ -90,6 +90,40 @@
                 .then(data => {})
                 .catch(error => console.error('Erreur:', error));
             }
+
+            document.getElementById('type-answer').onclick = function() {
+                fetch('http://192.168.0.110:9952/reset-room', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ code: room_code, type: "text" }),
+                })
+                .then(response => response.json())
+                .then(data => {})
+                .catch(error => console.error('Erreur:', error));
+            }
+
+            setInterval(function() {
+                if( room_code == 0 ) return;
+                fetch('http://192.168.0.110:9952/get_room', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ code: room_code }),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if( data.error ) {
+                        alert("Erreur lors de la récupération de la salle !");
+                        return;
+                    }
+                    document.getElementById('players-buzzed').innerHTML = data.buzzed_players.map(player => `<div>${player.name + " : " + player.answer}<br></div>`).join('');
+                    document.getElementById('players').innerHTML = data.players.map(player => `<div>${player}</div>`).join('');
+                })
+                .catch(error => console.error('Erreur:', error));
+            }, 100);
         </script>
     </body>
 </html>

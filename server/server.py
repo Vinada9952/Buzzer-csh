@@ -124,7 +124,35 @@ def buzz():
                 }
             )
             room["state"] = "buzzed"
-            print( "remove", player_name, "from", room["players"] )
+            # print( "remove", player_name, "from", room["players"] )
+            room["players"].remove( player_name )
+            room["buzzed_players"].sort( key=lambda x: x["timestamp_buzz"] )
+    print( rooms )
+    return {"success": True}
+
+@app.route( "/submit", methods=["POST"] )
+def submit_answer():
+    json = None
+    try:
+        json = request.get_json( force=True )
+    except Exception as e:
+        print("Erreur JSON :", e)
+        return {"error": "invalid JSON"}, 400
+    
+    room_code = json.get("code")
+    player_name = json.get("player")
+    answer_text = json.get("answer")
+    time_buzz = json.get("time")
+    for room in rooms:
+        if room["code"] == room_code:
+            room["buzzed_players"].append(
+                {
+                    "name": player_name,
+                    "answer": answer_text,
+                    "timestamp_buzz": time_buzz
+                }
+            )
+            room["state"] = "buzzed"
             room["players"].remove( player_name )
             room["buzzed_players"].sort( key=lambda x: x["timestamp_buzz"] )
     print( rooms )
@@ -141,6 +169,7 @@ def reset_room():
 
     room_code = json.get("code")
     reset_type = json.get("type")
+    print( reset_type )
     for room in rooms:
         if room["code"] == room_code:
             room["state"] = "reset"
@@ -310,6 +339,40 @@ class Pages:
                 .then(data => {})
                 .catch(error => console.error('Erreur:', error));
             }
+
+            document.getElementById('type-answer').onclick = function() {
+                fetch('http://192.168.0.110:9952/reset-room', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ code: room_code, type: "text" }),
+                })
+                .then(response => response.json())
+                .then(data => {})
+                .catch(error => console.error('Erreur:', error));
+            }
+
+            setInterval(function() {
+                if( room_code == 0 ) return;
+                fetch('http://192.168.0.110:9952/get_room', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ code: room_code }),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if( data.error ) {
+                        alert("Erreur lors de la récupération de la salle !");
+                        return;
+                    }
+                    document.getElementById('players-buzzed').innerHTML = data.buzzed_players.map(player => `<div>${player.name + " : " + player.answer}<br></div>`).join('');
+                    document.getElementById('players').innerHTML = data.players.map(player => `<div>${player}</div>`).join('');
+                })
+                .catch(error => console.error('Erreur:', error));
+            }, 100);
         </script>
     </body>
 </html>"""
@@ -421,6 +484,16 @@ class Pages:
 
             #type-answer {
                 display: none;
+                flex-direction: column;
+                align-items: center;
+            }
+
+            #type-answer input {
+                width: 80%;
+            }
+
+            #type-answer button {
+                width: auto;
             }
         </style>
     </head>
@@ -497,52 +570,58 @@ class Pages:
                     body: JSON.stringify({ code: room_code, player: player_name, time: Date.now() }),
                 })
                 .then(response => response.json())
-                .then(data => {
-                    if( data.valid_code == false ) {
-                        alert("Code de salle invalide !");
-                        return;
-                    }
-                    if( data.valid_name == false ) {
-                        alert("Nom invalide !");
-                        return;
-                    }
-                    document.getElementById('room-code').style.display = 'none';
-                    document.getElementById('in-game').style.display = 'block';
+                .then(data => {})
+                .catch(error => console.error('Erreur:', error));
+            };
+
+            document.getElementById('answer-submit').onclick = function() {
+                document.getElementById('answer-submit').style.display = 'none';
+                fetch('http://192.168.0.110:9952/submit', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ code: room_code, player: player_name, answer: document.getElementById('answer-input').value, time: Date.now() }),
                 })
+                .then(response => response.json())
+                .then(data => {})
                 .catch(error => console.error('Erreur:', error));
             };
 
             setInterval(function() {
-                    if( room_code == 0 ) return;
-                    fetch('http://192.168.0.110:9952/get_room', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({ code: room_code }),
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if( data.error ) {
-                            alert("Erreur lors de la récupération de la salle !");
-                            return;
+                if( room_code == 0 ) return;
+                fetch('http://192.168.0.110:9952/get_room', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ code: room_code }),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if( data.error ) {
+                        alert("Erreur lors de la récupération de la salle !");
+                        return;
+                    }
+                    console.log(data.type);
+                    document.getElementById('players-buzzed').innerHTML = data.buzzed_players.map(player => `<div>${player.name}<br></div>`).join('');
+                    document.getElementById('players').innerHTML = data.players.map(player => `<div>${player}</div>`).join('');
+                    if( data.state == "reset" ) {
+                        if( data.type == "button" ) {
+                            document.getElementById('buzz-answer').style.display = 'block';
+                            document.getElementById('no-buzzed').style.display = 'block';
+                            document.getElementById('buzzed').style.display = 'none';
+                            document.getElementById('type-answer').style.display = 'none';
+                        } else if( data.type == "text" ) {
+                            document.getElementById('buzz-answer').style.display = 'none';
+                            document.getElementById('type-answer').style.display = 'flex';
+                            document.getElementById('answer-input').style.display = 'block';
+                            document.getElementById('answer-submit').style.display = 'block';
                         }
-                        document.getElementById('players-buzzed').innerHTML = data.buzzed_players.map(player => `<div>${player.name}</div>`).join('');
-                        document.getElementById('players').innerHTML = data.players.map(player => `<div>${player}</div>`).join('');
-                        if( data.state == "reset" ) {
-                            if( data.type == "button" ) {
-                                document.getElementById('buzz-answer').style.display = 'block';
-                                document.getElementById('no-buzzed').style.display = 'block';
-                                document.getElementById('buzzed').style.display = 'none';
-                                document.getElementById('type-answer').style.display = 'none';
-                            } else if( data.type == "text" ) {
-                                document.getElementById('buzz-answer').style.display = 'none';
-                                document.getElementById('type-answer').style.display = 'block';
-                            }
-                        }
-                    })
-                    .catch(error => console.error('Erreur:', error));
-                }, 100);
+                    }
+                })
+                .catch(error => console.error('Erreur:', error));
+            }, 100);
         </script>
     </body>
 </html>"""
