@@ -196,6 +196,38 @@
                 })
                 .catch(error => console.error('Erreur:', error));
             };
+
+            setInterval(function() {
+                    if( room_code == 0 ) return;
+                    fetch('http://192.168.0.110:9952/get_room', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ code: room_code }),
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if( data.error ) {
+                            alert("Erreur lors de la récupération de la salle !");
+                            return;
+                        }
+                        document.getElementById('players-buzzed').innerHTML = data.buzzed_players.map(player => `<div>${player.name}</div>`).join('');
+                        document.getElementById('players').innerHTML = data.players.map(player => `<div>${player}</div>`).join('');
+                        if( data.state == "reset" ) {
+                            if( data.type == "button" ) {
+                                document.getElementById('buzz-answer').style.display = 'block';
+                                document.getElementById('no-buzzed').style.display = 'block';
+                                document.getElementById('buzzed').style.display = 'none';
+                                document.getElementById('type-answer').style.display = 'none';
+                            } else if( data.type == "text" ) {
+                                document.getElementById('buzz-answer').style.display = 'none';
+                                document.getElementById('type-answer').style.display = 'block';
+                            }
+                        }
+                    })
+                    .catch(error => console.error('Erreur:', error));
+                }, 100);
         </script>
     </body>
 </html>

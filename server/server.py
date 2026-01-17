@@ -130,6 +130,27 @@ def buzz():
     print( rooms )
     return {"success": True}
 
+@app.route( "/reset-room", methods=["POST"] )
+def reset_room():
+    json = None
+    try:
+        json = request.get_json( force=True )
+    except Exception as e:
+        print("Erreur JSON :", e)
+        return {"error": "invalid JSON"}, 400
+
+    room_code = json.get("code")
+    reset_type = json.get("type")
+    for room in rooms:
+        if room["code"] == room_code:
+            room["state"] = "reset"
+            room["type"] = "button" if reset_type == "buzz" else "text"
+            for player in room["buzzed_players"]:
+                room["players"].append( player["name"] )
+            room["buzzed_players"] = []
+    print( rooms )
+    return {"success": True}
+
 class Pages:
     MAIN_PAGE = """<!DOCTYPE html>
 <html lang="fr">
@@ -255,9 +276,9 @@ class Pages:
 
             <h3 style="color: white;" id="room-code">Code de salle : </h3>
 
-            <button id="buzz-answer">Rénitialiser et mettre une question collective</button>
+            <button id="buzz-answer">Réinitialiser - question collective</button>
             <br><br>
-            <button id="type-answer">Rénitialiser et mettre une question par écrit</button>
+            <button id="type-answer">Réinitialiser - question écrite</button>
 
             <h2 style="color: white;">Joueurs ayant buzzé</h2>
             <div id="players-buzzed" style="color: white;"></div>
@@ -265,6 +286,7 @@ class Pages:
             <div id="players" style="color: white;"></div>
         </div>
         <script>
+            globalThis.room_code = 0;
             fetch('http://192.168.0.110:9952/create-room', {
                 method: 'GET',
             })
@@ -272,8 +294,22 @@ class Pages:
             .then(data => {
                 console.log(data.code);
                 document.getElementById('room-code').innerText += " " + data.code;
+                room_code = data.code;
             })
             .catch(error => console.error('Erreur:', error));
+
+            document.getElementById('buzz-answer').onclick = function() {
+                fetch('http://192.168.0.110:9952/reset-room', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ code: room_code, type: "buzz" }),
+                })
+                .then(response => response.json())
+                .then(data => {})
+                .catch(error => console.error('Erreur:', error));
+            }
         </script>
     </body>
 </html>"""
@@ -475,6 +511,38 @@ class Pages:
                 })
                 .catch(error => console.error('Erreur:', error));
             };
+
+            setInterval(function() {
+                    if( room_code == 0 ) return;
+                    fetch('http://192.168.0.110:9952/get_room', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ code: room_code }),
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if( data.error ) {
+                            alert("Erreur lors de la récupération de la salle !");
+                            return;
+                        }
+                        document.getElementById('players-buzzed').innerHTML = data.buzzed_players.map(player => `<div>${player.name}</div>`).join('');
+                        document.getElementById('players').innerHTML = data.players.map(player => `<div>${player}</div>`).join('');
+                        if( data.state == "reset" ) {
+                            if( data.type == "button" ) {
+                                document.getElementById('buzz-answer').style.display = 'block';
+                                document.getElementById('no-buzzed').style.display = 'block';
+                                document.getElementById('buzzed').style.display = 'none';
+                                document.getElementById('type-answer').style.display = 'none';
+                            } else if( data.type == "text" ) {
+                                document.getElementById('buzz-answer').style.display = 'none';
+                                document.getElementById('type-answer').style.display = 'block';
+                            }
+                        }
+                    })
+                    .catch(error => console.error('Erreur:', error));
+                }, 100);
         </script>
     </body>
 </html>"""
