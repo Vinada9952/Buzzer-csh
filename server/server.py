@@ -368,8 +368,8 @@ class Pages:
                 .then(response => response.json())
                 .then(data => {
                     if( data.error ) {
-                        alert("Erreur lors de la récupération de la salle !");
-                        return;
+                        alert("Impossible de trouver la salle !");
+                        window.location.reload();
                     }
 
                     console.log("last state = " + last_state);
@@ -619,8 +619,8 @@ class Pages:
                 .then(response => response.json())
                 .then(data => {
                     if( data.error ) {
-                        alert("Erreur lors de la récupération de la salle !");
-                        return;
+                        // alert("Erreur lors de la récupération de la salle !");
+                        window.location.reload();
                     }
 
                     console.log("last state = " + last_state);
