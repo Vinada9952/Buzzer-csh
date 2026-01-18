@@ -1,4 +1,4 @@
 éviter que 1 identité se double
-quand il ne trouve pas la salle : reload
+kill room when not used
 bouton enable - disable audio
 bouton quit room
