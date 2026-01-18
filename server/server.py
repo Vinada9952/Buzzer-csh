@@ -315,6 +315,9 @@ class Pages:
             <div id="players" style="color: white;"></div>
         </div>
         <script>
+            globalThis.buzz_sound = new Audio( "https://www.myinstants.com/media/sounds/wrong-answer-sound-effect.mp3" )
+            globalThis.last_state = "none";
+
             globalThis.room_code = 0;
             fetch('http://192.168.0.110:9952/create-room', {
                 method: 'GET',
@@ -368,6 +371,13 @@ class Pages:
                         alert("Erreur lors de la récupération de la salle !");
                         return;
                     }
+
+                    console.log("last state = " + last_state);
+                    console.log("current state = " + data.state);
+                    if( last_state == "reset" && data.state == "buzzed" ) {
+                        buzz_sound.play();
+                    }
+
                     if( data.type == "text" ) {
                         document.getElementById('players-buzzed').innerHTML = data.buzzed_players.map(player => `<div>${player.name + " : " + player.answer}<br></div>`).join('');
                         document.getElementById('players').innerHTML = data.players.map(player => `<div>${player}</div>`).join('');
@@ -376,6 +386,7 @@ class Pages:
                         document.getElementById('players-buzzed').innerHTML = data.buzzed_players.map(player => `<div>${player.name}<br></div>`).join('');
                         document.getElementById('players').innerHTML = data.players.map(player => `<div>${player}</div>`).join('');
                     }
+                    last_state = data.state;
                 })
                 .catch(error => console.error('Erreur:', error));
             }, 100);
@@ -536,6 +547,8 @@ class Pages:
             </div>
         </div>
         <script>
+            globalThis.buzz_sound = new Audio( "https://www.myinstants.com/media/sounds/wrong-answer-sound-effect.mp3" )
+            globalThis.last_state = "none";
             globalThis.room_code = 0;
             globalThis.player_name = "";
             document.getElementById('room-code-submit').onclick = function() {
@@ -609,6 +622,14 @@ class Pages:
                         alert("Erreur lors de la récupération de la salle !");
                         return;
                     }
+
+                    console.log("last state = " + last_state);
+                    console.log("current state = " + data.state);
+                    if( last_state == "reset" && data.state == "buzzed" ) {
+                        buzz_sound.play();
+                        console.log("played sound");
+                    }
+
                     console.log(data.type);
                     document.getElementById('players-buzzed').innerHTML = data.buzzed_players.map(player => `<div>${player.name}<br></div>`).join('');
                     document.getElementById('players').innerHTML = data.players.map(player => `<div>${player}</div>`).join('');
@@ -625,6 +646,7 @@ class Pages:
                             document.getElementById('answer-submit').style.display = 'block';
                         }
                     }
+                    last_state = data.state;
                 })
                 .catch(error => console.error('Erreur:', error));
             }, 100);
