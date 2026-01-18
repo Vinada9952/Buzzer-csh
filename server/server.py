@@ -650,6 +650,12 @@ class Pages:
                             document.getElementById('answer-submit').style.display = 'block';
                         }
                     }
+                    if( data.state == "buzzed" ) {
+                        if( data.buzzed_players.includes(player_name) ) {
+                            document.getElementById('no-buzzed').style.display = 'none';
+                            document.getElementById('buzzed').style.display = 'block';
+                        }
+                    }
                     last_state = data.state;
                 })
                 .catch(error => console.error('Erreur:', error));
