@@ -97,6 +97,10 @@ def get_room():
     code = json.get("code")
     for room in rooms:
         if room["code"] == code:
+            for player in room["players"]:
+                for buzzed in room["buzzed_players"]:
+                    if buzzed["name"] == player:
+                        room["players"].remove( player )
             return room
     return {"error": "room not found"}, 404
 
