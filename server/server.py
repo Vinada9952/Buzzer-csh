@@ -184,6 +184,44 @@ def reset_room():
     print( rooms )
     return {"success": True}
 
+@app.route( "/close-room", methods=["POST"] )
+def close_room():
+    json = None
+    try:
+        json = request.get_json( force=True )
+    except Exception as e:
+        print("Erreur JSON :", e)
+        return {"error": "invalid JSON"}, 400
+
+    room_code = json.get("code")
+    for room in rooms:
+        if room["code"] == room_code:
+            rooms.remove( room )
+            break
+    print( rooms )
+    return {"success": True}
+
+@app.route( "/quit-player", methods=["POST"] )
+def quit_player():
+    json = None
+    try:
+        json = request.get_json( force=True )
+    except Exception as e:
+        print("Erreur JSON :", e)
+        return {"error": "invalid JSON"}, 400
+
+    room_code = json.get("code")
+    player_name = json.get("player")
+    for room in rooms:
+        if room["code"] == room_code:
+            if player_name in room["players"]:
+                room["players"].remove( player_name )
+            if player_name in [p["name"] for p in room["buzzed_players"]]:
+                room["buzzed_players"] = [p for p in room["buzzed_players"] if p["name"] != player_name]
+            break
+    print( rooms )
+    return {"success": True}
+
 class Pages:
     MAIN_PAGE = """<!DOCTYPE html>
 <html lang="fr">
@@ -359,6 +397,16 @@ class Pages:
                 .then(data => {})
                 .catch(error => console.error('Erreur:', error));
             }
+
+            window.addEventListener("beforeunload", function (e) {
+                fetch('http://192.168.0.110:9952/close-room', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ code: room_code }),
+                })
+            });
 
             setInterval(function() {
                 if( room_code == 0 ) return;
@@ -610,6 +658,16 @@ class Pages:
                 .then(data => {})
                 .catch(error => console.error('Erreur:', error));
             };
+
+            window.addEventListener("beforeunload", function (e) {
+                fetch('http://192.168.0.110:9952/quit-player', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ code: room_code, name: player_name }),
+                })
+            });
 
             setInterval(function() {
                 if( room_code == 0 ) return;

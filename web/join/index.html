@@ -212,6 +212,16 @@
                 .catch(error => console.error('Erreur:', error));
             };
 
+            window.addEventListener("beforeunload", function (e) {
+                fetch('http://192.168.0.110:9952/quit-player', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ code: room_code, name: player_name }),
+                })
+            });
+
             setInterval(function() {
                 if( room_code == 0 ) return;
                 fetch('http://192.168.0.110:9952/get_room', {
