@@ -135,8 +135,9 @@
 
                     console.log("last state = " + last_state);
                     console.log("current state = " + data.state);
-                    if( last_state == "reset" && data.state == "buzzed" ) {
+                    if( last_state == "reset" && data.state == "buzzed" && data.type == "button" ) {
                         buzz_sound.play();
+                        console.log("played sound");
                     }
 
                     if( data.type == "text" ) {

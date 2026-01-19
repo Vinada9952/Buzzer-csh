@@ -426,8 +426,9 @@ class Pages:
 
                     console.log("last state = " + last_state);
                     console.log("current state = " + data.state);
-                    if( last_state == "reset" && data.state == "buzzed" ) {
+                    if( last_state == "reset" && data.state == "buzzed" && data.type == "button" ) {
                         buzz_sound.play();
+                        console.log("played sound");
                     }
 
                     if( data.type == "text" ) {
@@ -687,7 +688,7 @@ class Pages:
 
                     console.log("last state = " + last_state);
                     console.log("current state = " + data.state);
-                    if( last_state == "reset" && data.state == "buzzed" ) {
+                    if( last_state == "reset" && data.state == "buzzed" && data.type == "button" ) {
                         buzz_sound.play();
                         console.log("played sound");
                     }
@@ -708,10 +709,12 @@ class Pages:
                             document.getElementById('answer-submit').style.display = 'block';
                         }
                     }
-                    if( data.state == "buzzed" ) {
-                        if( data.buzzed_players.includes(player_name) ) {
+                    if( data.state == "buzzed" && data.buzzed_players.includes(player_name) ) {
+                        if( data.type == "button" ) {
                             document.getElementById('no-buzzed').style.display = 'none';
                             document.getElementById('buzzed').style.display = 'block';
+                        } else if( data.type == "text" ) {
+                            document.getElementById('answer-submit').style.display = 'none';
                         }
                     }
                     last_state = data.state;
