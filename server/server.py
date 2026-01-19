@@ -35,9 +35,13 @@ def join_menu():
 
 @app.route( "/create-room" )
 def create_room():
-    room_code = 9952
-    while room_code == 9952:
+    code_exists = True
+    while code_exists:
         room_code = random.randint( 1000, 9999 )
+        code_exists = False
+        for room in rooms:
+            if room["code"] == room_code:
+                code_exists = True
     new_room = {
         "code": room_code,
         "state": "reset",
