@@ -104,6 +104,20 @@ def get_room():
             return room
     return {"error": "room not found"}, 404
 
+@app.route( "/get_all", methods=["POST"] )
+def get_room():
+    json = None
+    try:
+        json = request.get_json( force=True )
+    except Exception as e:
+        print("Erreur JSON :", e)
+        return {"error": "invalid JSON"}, 400
+
+    pwd = json.get("pwd")
+    if pwd == 175028:
+        return rooms
+    return {"error": "invalid password"}, 404
+
 @app.route( "/buzz", methods=["POST"] )
 def buzz():
     json = None
