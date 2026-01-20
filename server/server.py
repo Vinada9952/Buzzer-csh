@@ -646,6 +646,7 @@ class Pages:
             globalThis.buzz_sound = new Audio( "https://www.myinstants.com/media/sounds/wrong-answer-sound-effect.mp3" )
             globalThis.last_state = "none";
             globalThis.room_code = 0;
+            globalThis.type = "button";
             globalThis.player_name = "";
             document.getElementById('room-code-submit').onclick = function() {
                 room_code = parseInt( document.getElementById('room-code-input').value );
@@ -690,9 +691,15 @@ class Pages:
             };
 
             document.addEventListener('keydown', (event) => {
-                if (event.code === 'Space') {
+                if (event.code === 'Space' && type == "button" && document.getElementById('no-buzzed').style.display != 'none') {
                     document.getElementById('buzzer').click();
                 }
+                // else if( type == "text" ) {
+                //     if (event.key.length === 1)
+                //     {
+                //         document.getElementById( 'answer-input' ).value += event.key;
+                //     }
+                // }
             });
 
             document.getElementById('answer-submit').onclick = function() {
@@ -735,6 +742,8 @@ class Pages:
                         // alert("Erreur lors de la récupération de la salle !");
                         window.location.reload();
                     }
+
+                    type = data.type;
 
                     if( last_state == "reset" && data.state == "buzzed" && data.type == "button" ) {
                         buzz_sound.play();
