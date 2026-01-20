@@ -47,6 +47,25 @@
                 border-radius: 5px;
                 cursor: pointer;
             }
+
+            #reset-buttons {
+                flex-direction: column;
+                align-items: center;
+                align-content: center;
+                align-self: center;
+            }
+            
+            #buzz-answer {
+                align-content: center;
+                align-items: center;
+                align-self: center;
+            }
+            
+            #type-answer {
+                align-content: center;
+                align-items: center;
+                align-self: center;
+            }
         </style>
     </head>
     <body>
@@ -56,9 +75,11 @@
 
             <h3 style="color: white;" id="room-code">Code de salle : </h3>
 
-            <button id="buzz-answer">Réinitialiser - question collective</button>
-            <br><br>
-            <button id="type-answer">Réinitialiser - question écrite</button>
+            <div id="reset-buttons">
+                <button id="buzz-answer">Réinitialiser - question collective</button>
+                <br><br>
+                <button id="type-answer">Réinitialiser - question écrite</button>
+            </div>
 
             <h2 style="color: white;">Joueurs ayant buzzé</h2>
             <div id="players-buzzed" style="color: white;"></div>
@@ -136,17 +157,26 @@
                         buzz_sound.play();
                     }
 
+                    type_state = 'block';
+                    buzz_state = 'block';
+                    console.log( "data.state = " + data.state );
                     if( data.type == "text" ) {
-                        document.getElementById('players-buzzed').innerHTML = data.buzzed_players.map(player => `<div>${player.name + " : " + player.answer}<br></div>`).join('');
+                        document.getElementById('players-buzzed').innerHTML = data.buzzed_players.map(player => `<div>${player.name + " : " + player.answer + "<br>"}</div>`).join('');
                         document.getElementById('players').innerHTML = data.players.map(player => `<div>${player}</div>`).join('');
-                        // if( data.state == "reset" ) {
-
-                        // }
+                        if( data.state == "reset" ) {
+                            type_state = 'none';
+                        }
                     }
                     if( data.type == "button" ) {
-                        document.getElementById('players-buzzed').innerHTML = data.buzzed_players.map(player => `<div>${player.name}<br></div>`).join('');
+                        document.getElementById('players-buzzed').innerHTML = data.buzzed_players.map(player => `<div>${player.name+"<br>"}</div>`).join('');
                         document.getElementById('players').innerHTML = data.players.map(player => `<div>${player}</div>`).join('');
+                        if( data.state == "reset" ) {
+                            buzz_state = 'none';
+                        }
                     }
+                    document.getElementById( "type-answer" ).style.display = type_state;
+                    document.getElementById( "buzz-answer" ).style.display = buzz_state;
+                    document.getElementById( "reset-buttons" ).style.display = "flex";
                     last_state = data.state;
                 })
                 .catch(error => console.error('Erreur:', error));

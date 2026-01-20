@@ -105,7 +105,7 @@ def get_room():
     return {"error": "room not found"}, 404
 
 @app.route( "/get_all", methods=["POST"] )
-def get_room():
+def get_all():
     json = None
     try:
         json = request.get_json( force=True )
@@ -352,6 +352,25 @@ class Pages:
                 border-radius: 5px;
                 cursor: pointer;
             }
+
+            #reset-buttons {
+                flex-direction: column;
+                align-items: center;
+                align-content: center;
+                align-self: center;
+            }
+            
+            #buzz-answer {
+                align-content: center;
+                align-items: center;
+                align-self: center;
+            }
+            
+            #type-answer {
+                align-content: center;
+                align-items: center;
+                align-self: center;
+            }
         </style>
     </head>
     <body>
@@ -361,9 +380,11 @@ class Pages:
 
             <h3 style="color: white;" id="room-code">Code de salle : </h3>
 
-            <button id="buzz-answer">Réinitialiser - question collective</button>
-            <br><br>
-            <button id="type-answer">Réinitialiser - question écrite</button>
+            <div id="reset-buttons">
+                <button id="buzz-answer">Réinitialiser - question collective</button>
+                <br><br>
+                <button id="type-answer">Réinitialiser - question écrite</button>
+            </div>
 
             <h2 style="color: white;">Joueurs ayant buzzé</h2>
             <div id="players-buzzed" style="color: white;"></div>
@@ -380,7 +401,6 @@ class Pages:
             })
             .then(response => response.json())
             .then(data => {
-                //console.log(data.code);
                 document.getElementById('room-code').innerText += " " + data.code;
                 room_code = data.code;
             })
@@ -438,21 +458,30 @@ class Pages:
                         window.location.reload();
                     }
 
-                    //console.log("last state = " + last_state);
-                    //console.log("current state = " + data.state);
                     if( last_state == "reset" && data.state == "buzzed" && data.type == "button" ) {
                         buzz_sound.play();
-                        //console.log("played sound");
                     }
 
+                    type_state = 'block';
+                    buzz_state = 'block';
+                    console.log( "data.state = " + data.state );
                     if( data.type == "text" ) {
-                        document.getElementById('players-buzzed').innerHTML = data.buzzed_players.map(player => `<div>${player.name + " : " + player.answer}<br></div>`).join('');
+                        document.getElementById('players-buzzed').innerHTML = data.buzzed_players.map(player => `<div>${player.name + " : " + player.answer + "<br>"}</div>`).join('');
                         document.getElementById('players').innerHTML = data.players.map(player => `<div>${player}</div>`).join('');
+                        if( data.state == "reset" ) {
+                            type_state = 'none';
+                        }
                     }
                     if( data.type == "button" ) {
-                        document.getElementById('players-buzzed').innerHTML = data.buzzed_players.map(player => `<div>${player.name}<br></div>`).join('');
+                        document.getElementById('players-buzzed').innerHTML = data.buzzed_players.map(player => `<div>${player.name+"<br>"}</div>`).join('');
                         document.getElementById('players').innerHTML = data.players.map(player => `<div>${player}</div>`).join('');
+                        if( data.state == "reset" ) {
+                            buzz_state = 'none';
+                        }
                     }
+                    document.getElementById( "type-answer" ).style.display = type_state;
+                    document.getElementById( "buzz-answer" ).style.display = buzz_state;
+                    document.getElementById( "reset-buttons" ).style.display = "flex";
                     last_state = data.state;
                 })
                 .catch(error => console.error('Erreur:', error));
