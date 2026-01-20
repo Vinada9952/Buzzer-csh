@@ -689,6 +689,12 @@ class Pages:
                 .catch(error => console.error('Erreur:', error));
             };
 
+            document.addEventListener('keydown', (event) => {
+                if (event.code === 'Space') {
+                    document.getElementById('buzzer').click();
+                }
+            });
+
             document.getElementById('answer-submit').onclick = function() {
                 document.getElementById('answer-submit').style.display = 'none';
                 fetch('http://127.0.0.1:9952/submit', {
