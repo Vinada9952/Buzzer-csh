@@ -701,6 +701,7 @@ class Pages:
                 .then(response => response.json())
                 .then(data => {})
                 .catch(error => console.error('Erreur:', error));
+                document.getElementById('answer-input').value = "";
             };
 
             window.addEventListener("beforeunload", function (e) {
@@ -729,14 +730,9 @@ class Pages:
                         window.location.reload();
                     }
 
-                    //console.log("last state = " + last_state);
-                    //console.log("current state = " + data.state);
                     if( last_state == "reset" && data.state == "buzzed" && data.type == "button" ) {
                         buzz_sound.play();
-                        //console.log("played sound");
                     }
-
-                    //console.log(data.type);
                     document.getElementById('players-buzzed').innerHTML = data.buzzed_players.map(player => `<div>${player.name}<br></div>`).join('');
                     document.getElementById('players').innerHTML = data.players.map(player => `<div>${player}</div>`).join('');
                     if( data.state == "reset" ) {
@@ -752,15 +748,13 @@ class Pages:
                             document.getElementById('answer-submit').style.display = 'block';
                         }
                     }
-                    console.log( "player answered = " + data.buzzed_players.includes(player_name) + " players answered = " + data.buzzed_players );
                     if( data.state == "buzzed" && !data.players.includes(player_name) ) {
                         if( data.type == "button" ) {
                             document.getElementById('no-buzzed').style.display = 'none';
                             document.getElementById('buzzed').style.display = 'block';
-                            console.log("hided buzzer");
                         } else if( data.type == "text" ) {
                             document.getElementById('answer-submit').style.display = 'none';
-                            console.log("hided submit");
+                            document.getElementById('answer-input').value = "";
                         }
                     }
                     last_state = data.state;

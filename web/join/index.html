@@ -210,6 +210,7 @@
                 .then(response => response.json())
                 .then(data => {})
                 .catch(error => console.error('Erreur:', error));
+                document.getElementById('answer-input').value = "";
             };
 
             window.addEventListener("beforeunload", function (e) {
@@ -262,6 +263,7 @@
                             document.getElementById('buzzed').style.display = 'block';
                         } else if( data.type == "text" ) {
                             document.getElementById('answer-submit').style.display = 'none';
+                            document.getElementById('answer-input').value = "";
                         }
                     }
                     last_state = data.state;
