@@ -160,7 +160,7 @@
                 room_code = parseInt( document.getElementById('room-code-input').value );
                 player_name = document.getElementById('player-name-input').value;
 
-                fetch('http://192.168.0.110:9952/join-room', {
+                fetch('http://127.0.0.1:9952/join-room', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -186,7 +186,7 @@
             document.getElementById('buzzer').onclick = function() {
                 document.getElementById('no-buzzed').style.display = 'none';
                 document.getElementById('buzzed').style.display = 'block';
-                fetch('http://192.168.0.110:9952/buzz', {
+                fetch('http://127.0.0.1:9952/buzz', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -200,7 +200,7 @@
 
             document.getElementById('answer-submit').onclick = function() {
                 document.getElementById('answer-submit').style.display = 'none';
-                fetch('http://192.168.0.110:9952/submit', {
+                fetch('http://127.0.0.1:9952/submit', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -213,7 +213,7 @@
             };
 
             window.addEventListener("beforeunload", function (e) {
-                fetch('http://192.168.0.110:9952/quit-player', {
+                fetch('http://127.0.0.1:9952/quit-player', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -224,7 +224,7 @@
 
             setInterval(function() {
                 if( room_code == 0 ) return;
-                fetch('http://192.168.0.110:9952/get_room', {
+                fetch('http://127.0.0.1:9952/get_room', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -238,14 +238,9 @@
                         window.location.reload();
                     }
 
-                    console.log("last state = " + last_state);
-                    console.log("current state = " + data.state);
                     if( last_state == "reset" && data.state == "buzzed" && data.type == "button" ) {
                         buzz_sound.play();
-                        console.log("played sound");
                     }
-
-                    console.log(data.type);
                     document.getElementById('players-buzzed').innerHTML = data.buzzed_players.map(player => `<div>${player.name}<br></div>`).join('');
                     document.getElementById('players').innerHTML = data.players.map(player => `<div>${player}</div>`).join('');
                     if( data.state == "reset" ) {
@@ -261,13 +256,12 @@
                             document.getElementById('answer-submit').style.display = 'block';
                         }
                     }
-                    if( data.state == "buzzed" && data.buzzed_players.includes(player_name) ) {
+                    if( data.state == "buzzed" && !data.players.includes(player_name) ) {
                         if( data.type == "button" ) {
                             document.getElementById('no-buzzed').style.display = 'none';
                             document.getElementById('buzzed').style.display = 'block';
                         } else if( data.type == "text" ) {
                             document.getElementById('answer-submit').style.display = 'none';
-                            console.log("hided submit");
                         }
                     }
                     last_state = data.state;

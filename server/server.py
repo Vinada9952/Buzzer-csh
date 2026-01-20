@@ -101,10 +101,6 @@ def get_room():
     code = json.get("code")
     for room in rooms:
         if room["code"] == code:
-            for player in room["players"]:
-                for buzzed in room["buzzed_players"]:
-                    if buzzed["name"] == player:
-                        room["players"].remove( player )
             return room
     return {"error": "room not found"}, 404
 
@@ -285,10 +281,10 @@ class Pages:
             </div> 
             <script>
                 document.getElementById('join-button').onclick = function() {
-                    window.location.href = 'http://192.168.0.110:9952/join';
+                    window.location.href = 'http://127.0.0.1:9952/join';
                 };
                 document.getElementById('create-button').onclick = function() {
-                    window.location.href = 'http://192.168.0.110:9952/create';
+                    window.location.href = 'http://127.0.0.1:9952/create';
                 };
             </script>
     </body>
@@ -365,19 +361,19 @@ class Pages:
             globalThis.last_state = "none";
 
             globalThis.room_code = 0;
-            fetch('http://192.168.0.110:9952/create-room', {
+            fetch('http://127.0.0.1:9952/create-room', {
                 method: 'GET',
             })
             .then(response => response.json())
             .then(data => {
-                console.log(data.code);
+                //console.log(data.code);
                 document.getElementById('room-code').innerText += " " + data.code;
                 room_code = data.code;
             })
             .catch(error => console.error('Erreur:', error));
 
             document.getElementById('buzz-answer').onclick = function() {
-                fetch('http://192.168.0.110:9952/reset-room', {
+                fetch('http://127.0.0.1:9952/reset-room', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -390,7 +386,7 @@ class Pages:
             }
 
             document.getElementById('type-answer').onclick = function() {
-                fetch('http://192.168.0.110:9952/reset-room', {
+                fetch('http://127.0.0.1:9952/reset-room', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -403,7 +399,7 @@ class Pages:
             }
 
             window.addEventListener("beforeunload", function (e) {
-                fetch('http://192.168.0.110:9952/close-room', {
+                fetch('http://127.0.0.1:9952/close-room', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -414,7 +410,7 @@ class Pages:
 
             setInterval(function() {
                 if( room_code == 0 ) return;
-                fetch('http://192.168.0.110:9952/get_room', {
+                fetch('http://127.0.0.1:9952/get_room', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -428,11 +424,11 @@ class Pages:
                         window.location.reload();
                     }
 
-                    console.log("last state = " + last_state);
-                    console.log("current state = " + data.state);
+                    //console.log("last state = " + last_state);
+                    //console.log("current state = " + data.state);
                     if( last_state == "reset" && data.state == "buzzed" && data.type == "button" ) {
                         buzz_sound.play();
-                        console.log("played sound");
+                        //console.log("played sound");
                     }
 
                     if( data.type == "text" ) {
@@ -612,7 +608,7 @@ class Pages:
                 room_code = parseInt( document.getElementById('room-code-input').value );
                 player_name = document.getElementById('player-name-input').value;
 
-                fetch('http://192.168.0.110:9952/join-room', {
+                fetch('http://127.0.0.1:9952/join-room', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -638,7 +634,7 @@ class Pages:
             document.getElementById('buzzer').onclick = function() {
                 document.getElementById('no-buzzed').style.display = 'none';
                 document.getElementById('buzzed').style.display = 'block';
-                fetch('http://192.168.0.110:9952/buzz', {
+                fetch('http://127.0.0.1:9952/buzz', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -652,7 +648,7 @@ class Pages:
 
             document.getElementById('answer-submit').onclick = function() {
                 document.getElementById('answer-submit').style.display = 'none';
-                fetch('http://192.168.0.110:9952/submit', {
+                fetch('http://127.0.0.1:9952/submit', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -665,7 +661,7 @@ class Pages:
             };
 
             window.addEventListener("beforeunload", function (e) {
-                fetch('http://192.168.0.110:9952/quit-player', {
+                fetch('http://127.0.0.1:9952/quit-player', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -676,7 +672,7 @@ class Pages:
 
             setInterval(function() {
                 if( room_code == 0 ) return;
-                fetch('http://192.168.0.110:9952/get_room', {
+                fetch('http://127.0.0.1:9952/get_room', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -690,14 +686,14 @@ class Pages:
                         window.location.reload();
                     }
 
-                    console.log("last state = " + last_state);
-                    console.log("current state = " + data.state);
+                    //console.log("last state = " + last_state);
+                    //console.log("current state = " + data.state);
                     if( last_state == "reset" && data.state == "buzzed" && data.type == "button" ) {
                         buzz_sound.play();
-                        console.log("played sound");
+                        //console.log("played sound");
                     }
 
-                    console.log(data.type);
+                    //console.log(data.type);
                     document.getElementById('players-buzzed').innerHTML = data.buzzed_players.map(player => `<div>${player.name}<br></div>`).join('');
                     document.getElementById('players').innerHTML = data.players.map(player => `<div>${player}</div>`).join('');
                     if( data.state == "reset" ) {
@@ -713,10 +709,12 @@ class Pages:
                             document.getElementById('answer-submit').style.display = 'block';
                         }
                     }
-                    if( data.state == "buzzed" && data.buzzed_players.includes(player_name) ) {
+                    console.log( "player answered = " + data.buzzed_players.includes(player_name) + " players answered = " + data.buzzed_players );
+                    if( data.state == "buzzed" && !data.players.includes(player_name) ) {
                         if( data.type == "button" ) {
                             document.getElementById('no-buzzed').style.display = 'none';
                             document.getElementById('buzzed').style.display = 'block';
+                            console.log("hided buzzer");
                         } else if( data.type == "text" ) {
                             document.getElementById('answer-submit').style.display = 'none';
                             console.log("hided submit");
@@ -731,4 +729,4 @@ class Pages:
 </html>"""
 
 if __name__ == '__main__':
-    app.run( host='192.168.0.110', port=9952 )
+    app.run( host='0.0.0.0', port=9952 )
