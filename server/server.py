@@ -719,6 +719,7 @@ class Pages:
                             document.getElementById('buzzed').style.display = 'block';
                         } else if( data.type == "text" ) {
                             document.getElementById('answer-submit').style.display = 'none';
+                            console.log("hided submit");
                         }
                     }
                     last_state = data.state;
