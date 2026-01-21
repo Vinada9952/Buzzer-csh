@@ -24,7 +24,9 @@ room_example = {
 
 rooms = []
 
-@app.route( '/' )
+base_URL = '/'
+
+@app.route( base_URL )
 def main_menu():
     return Pages.MAIN_PAGE
 
