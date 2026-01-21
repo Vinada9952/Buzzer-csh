@@ -1,5 +1,8 @@
 from flask import Flask, request
 import random
+import requests
+from pydub import AudioSegment
+from pydub.playback import play
 
 app = Flask(__name__)
 
@@ -236,6 +239,29 @@ def quit_player():
     print( rooms )
     return {"success": True}
 
+@app.route( "/get-custom-sound", methods=["POST"] )
+def get_custom_sound():
+    print( "get custom sound called" )
+    json = None
+    try:
+        json = request.get_json( force=True )
+    except Exception as e:
+        print("Erreur JSON :", e)
+        return {"error": "invalid JSON"}, 400
+    link = json.get("url")
+    print( "link =", link )
+
+    page = requests.get(link).text
+
+    sound_line = ''
+    for line in page.split( '\n' ):
+        if line.find( '.mp3' ) != -1:
+            sound_line = line
+            break
+
+    url = "https://www.myinstants.com" + sound_line.split( "'" )[1]
+    return { "url": url }
+
 class Pages:
     MAIN_PAGE = """<!DOCTYPE html>
 <html lang="fr">
@@ -333,6 +359,24 @@ class Pages:
                 max-width: 500px;
             }
 
+            #change-sound {
+                text-align: center;
+                background: #2e313d;
+                padding: 20px;
+                border-radius: 10px;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                width: 90%;
+                max-width: 500px;
+            }
+
+            #sound-input {
+                width: 80%;
+                padding: 10px;
+                margin-bottom: 10px;
+                border: 1px solid #ccc;
+                border-radius: 5px;
+            }
+
 
             button {
                 padding: 10px 20px;
@@ -371,11 +415,22 @@ class Pages:
                 align-items: center;
                 align-self: center;
             }
+
+            #switch-to-change-sound {
+                position: absolute;
+                top: 20px;
+                right: 20px;
+            }
         </style>
     </head>
     <body>
+        <button id="switch-to-change-sound" onclick="
+            document.getElementById('container').style.display = 'none';
+            document.getElementById('switch-to-change-sound').style.display = 'none';
+            document.getElementById('change-sound').style.display = 'block';">
+            Changer le son
+        </button>
         <div id="container">
-            
             <h1 style="color: white;">Buzzer CSH</h1>
 
             <h3 style="color: white;" id="room-code">Code de salle : </h3>
@@ -391,7 +446,18 @@ class Pages:
             <h2 style="color: white;">Joueurs</h2>
             <div id="players" style="color: white;"></div>
         </div>
+        <div id="change-sound">
+            <h1 style="color: white;">Buzzer CSH</h1>
+            <h3 style="color: white;" id="room-code">Code de salle : </h3>
+            
+            <div id="change-zone">
+                <input type="text" id="sound-input" placeholder="URL du son" required><br><br>
+                <button id="change-sound-button">Valider</button>
+                <button id="link" onclick="window.open('https://www.myinstants.com/', '_blank')">Trouver un son</button>
+            </div>
+        </div>
         <script>
+            document.getElementById('change-sound').style.display = 'none';
             globalThis.buzz_sound = new Audio( "https://www.myinstants.com/media/sounds/wrong-answer-sound-effect.mp3" )
             globalThis.last_state = "none";
 
@@ -405,6 +471,31 @@ class Pages:
                 room_code = data.code;
             })
             .catch(error => console.error('Erreur:', error));
+
+            document.getElementById('change-sound-button').onclick = function() {
+                const sound_url = document.getElementById('sound-input').value;
+
+                fetch('http://127.0.0.1:9952/get-custom-sound', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ url: sound_url }),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log(data);
+                    if( data.error ) {
+                        alert("Erreur lors du changement de son.");
+                    }
+                    buzz_sound = new Audio( data.url );
+                    document.getElementById('change-sound').style.display = 'none';
+                    document.getElementById('sound-input').value = "";
+                    document.getElementById('container').style.display = 'block';
+                    document.getElementById('switch-to-change-sound').style.display = 'block';
+                })
+                .catch(error => console.error('Erreur:', error));
+            }
 
             document.getElementById('buzz-answer').onclick = function() {
                 fetch('http://127.0.0.1:9952/reset-room', {
