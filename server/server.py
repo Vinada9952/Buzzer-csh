@@ -26,6 +26,10 @@ rooms = []
 
 base_URL = '/'
 
+@app.route( "/get-base-url" )
+def get_base_url():
+    return {"url": base_URL}
+
 @app.route( base_URL )
 def main_menu():
     return Pages.MAIN_PAGE
@@ -361,16 +365,6 @@ class Pages:
                 max-width: 500px;
             }
 
-            #change-sound {
-                text-align: center;
-                background: #2e313d;
-                padding: 20px;
-                border-radius: 10px;
-                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-                width: 90%;
-                max-width: 500px;
-            }
-
             #sound-input {
                 width: 80%;
                 padding: 10px;
@@ -421,7 +415,17 @@ class Pages:
             #switch-to-change-sound {
                 position: absolute;
                 top: 20px;
-                right: 20px;
+                left: 20px;
+            }
+
+            #change-sound {
+                text-align: center;
+                background: #2e313d;
+                padding: 20px;
+                border-radius: 10px;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                width: 90%;
+                max-width: 500px;
             }
         </style>
     </head>
@@ -705,7 +709,7 @@ class Pages:
             #switch-to-change-sound {
                 position: absolute;
                 top: 20px;
-                right: 20px;
+                left: 20px;
             }
 
             #change-sound {
