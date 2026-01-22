@@ -1,8 +1,6 @@
 from flask import Flask, request
 import random
 import requests
-from pydub import AudioSegment
-from pydub.playback import play
 
 app = Flask(__name__)
 
