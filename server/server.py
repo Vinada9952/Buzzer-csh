@@ -386,31 +386,9 @@ class Pages:
                 align-items: center;
                 align-self: center;
             }
-
-            #switch-to-change-sound {
-                position: absolute;
-                top: 20px;
-                left: 20px;
-            }
-
-            #change-sound {
-                text-align: center;
-                background: #2e313d;
-                padding: 20px;
-                border-radius: 10px;
-                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-                width: 90%;
-                max-width: 500px;
-            }
         </style>
     </head>
     <body>
-        <!-- <button id="switch-to-change-sound" onclick="
-            document.getElementById('container').style.display = 'none';
-            document.getElementById('switch-to-change-sound').style.display = 'none';
-            document.getElementById('change-sound').style.display = 'block';">
-            Changer le son
-        </button> -->
         <div id="container">
             <h1 style="color: white;">Buzzer CSH</h1>
 
@@ -427,18 +405,7 @@ class Pages:
             <h2 style="color: white;">Joueurs</h2>
             <div id="players" style="color: white;"></div>
         </div>
-        <div id="change-sound">
-            <h1 style="color: white;">Buzzer CSH</h1>
-            <h3 style="color: white;" id="room-code">Code de salle : </h3>
-            
-            <div id="change-zone">
-                <input type="text" id="sound-input" placeholder="URL du son" required><br><br>
-                <button id="change-sound-button">Valider</button>
-                <button id="link" onclick="window.open('https://www.myinstants.com/', '_blank')">Trouver un son</button>
-            </div>
-        </div>
         <script>
-            document.getElementById('change-sound').style.display = 'none';
             globalThis.buzz_sound = new Audio( "https://www.myinstants.com/media/sounds/wrong-answer-sound-effect.mp3" )
             globalThis.last_state = "none";
 
@@ -452,31 +419,6 @@ class Pages:
                 room_code = data.code;
             })
             .catch(error => console.error('Erreur:', error));
-
-            document.getElementById('change-sound-button').onclick = function() {
-                const sound_url = document.getElementById('sound-input').value;
-
-                fetch('http://127.0.0.1:9952/get-custom-sound', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ url: sound_url }),
-                })
-                .then(response => response.json())
-                .then(data => {
-                    console.log(data);
-                    if( data.error ) {
-                        alert("Erreur lors du changement de son.");
-                    }
-                    buzz_sound = new Audio( data.url );
-                    document.getElementById('change-sound').style.display = 'none';
-                    document.getElementById('sound-input').value = "";
-                    document.getElementById('container').style.display = 'block';
-                    document.getElementById('switch-to-change-sound').style.display = 'block';
-                })
-                .catch(error => console.error('Erreur:', error));
-            }
 
             document.getElementById('buzz-answer').onclick = function() {
                 fetch('http://127.0.0.1:9952/reset-room', {
@@ -680,31 +622,9 @@ class Pages:
             #type-answer button {
                 width: auto;
             }
-
-            #switch-to-change-sound {
-                position: absolute;
-                top: 20px;
-                left: 20px;
-            }
-
-            #change-sound {
-                text-align: center;
-                background: #2e313d;
-                padding: 20px;
-                border-radius: 10px;
-                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-                width: 90%;
-                max-width: 500px;
-            }
         </style>
     </head>
     <body>
-        <!-- <button id="switch-to-change-sound" onclick="
-            document.getElementById('container').style.display = 'none';
-            document.getElementById('switch-to-change-sound').style.display = 'none';
-            document.getElementById('change-sound').style.display = 'block';">
-            Changer le son
-        </button> -->
         <div id="container">
             
             <h1 style="color: white;">Buzzer CSH</h1>
@@ -736,18 +656,7 @@ class Pages:
                 <div id="players" style="color: white;"></div>
             </div>
         </div>
-        <div id="change-sound">
-            <h1 style="color: white;">Buzzer CSH</h1>
-            <h3 style="color: white;" id="room-code">Code de salle : </h3>
-            
-            <div id="change-zone">
-                <input type="text" id="sound-input" placeholder="URL du son" required><br><br>
-                <button id="change-sound-button">Valider</button>
-                <button id="link" onclick="window.open('https://www.myinstants.com/', '_blank')">Trouver un son</button>
-            </div>
-        </div>
         <script>
-            document.getElementById('change-sound').style.display = 'none';
             globalThis.buzz_sound = new Audio( "https://www.myinstants.com/media/sounds/wrong-answer-sound-effect.mp3" )
             globalThis.last_state = "none";
             globalThis.room_code = 0;
@@ -779,35 +688,6 @@ class Pages:
                 })
                 .catch(error => console.error('Erreur:', error));
             };
-
-            document.getElementById('change-sound-button').onclick = function() {
-                const sound_url = document.getElementById('sound-input').value;
-
-                fetch('http://127.0.0.1:9952/get-custom-sound', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ url: sound_url }),
-                })
-                .then(response => response.json())
-                .then(data => {
-                    console.log("response received");
-                    console.log(data);
-                    if( data.error ) {
-                        alert("Erreur lors du changement de son.");
-                    }
-                    console.log("no error");
-                    buzz_sound = new Audio( data.url );
-                    console.log("change block values");
-                    document.getElementById('change-sound').style.display = 'none';
-                    document.getElementById('sound-input').value = "";
-                    document.getElementById('container').style.display = 'block';
-                    document.getElementById('switch-to-change-sound').style.display = 'block';
-                    console.log( "sound changed" )
-                })
-                .catch(error => console.error('Erreur:', error));
-            }
 
             document.getElementById('buzzer').onclick = function() {
                 document.getElementById('no-buzzed').style.display = 'none';
