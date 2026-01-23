@@ -1,6 +1,9 @@
 from flask import Flask, request
 import random
 import requests
+import threading
+
+shared_mutex = threading.Lock()
 
 app = Flask(__name__)
 
@@ -8,15 +11,31 @@ room_example = {
     "code": 9952,
     "state": "reset", # reset : No one buzzed. buzzed : someone buzzed
     "type": "button", # button : buzzing button. text : text input
-    "buzzed_players": [
-        {
-            "name": "Player1",
-            "answer": "Answer1",
-            "timestamp_buzz": 1768663825462
-        }
-    ],
     "players": [
-        "Player2"
+        {
+            "name": "Alice",
+            "buzzed": False,
+            "answer": "",
+            "timestamp_buzz": 0,
+            "team": 1,
+            "points": 0
+        },
+        {
+            "name": "Bob",
+            "buzzed": True,
+            "answer": "This is an answer",
+            "timestamp_buzz": 1234567890,
+            "team": 2,
+            "points": 10
+        },
+        {
+            "name": "Charlie",
+            "buzzed": True,
+            "answer": "",
+            "timestamp_buzz": 1234567899,
+            "team": 1,
+            "points": 15
+        }
     ]
 }
 
@@ -53,8 +72,7 @@ def create_room():
         "code": room_code,
         "state": "reset",
         "type": "button",
-        "buzzed_players": [],
-        "players": []
+        "players": [],
     }
     rooms.append( new_room )
     print( rooms )
@@ -81,16 +99,22 @@ def join_room():
         if room["code"] == code:
             return_json["valid_code"] = True
             for player in room["players"]:
-                if player == name:
-                    return_json["valid_name"] = False
-            for player in room["buzzed_players"]:
                 if player["name"] == name:
                     return_json["valid_name"] = False
     
     if return_json["valid_code"] and return_json["valid_name"]:
         for room in rooms:
             if room["code"] == code:
-                room["players"].append( name )
+                room["players"].append(
+                    {
+                        "name": name,
+                        "buzzed": False,
+                        "answer": "",
+                        "timestamp_buzz": 0,
+                        "team": 0,
+                        "points": 0
+                    }
+                )
                 break
     
     print( rooms )
@@ -108,6 +132,33 @@ def get_room():
     code = json.get("code")
     for room in rooms:
         if room["code"] == code:
+
+            preset_room = {
+                "code": room["code"],
+                "state": room["state"],
+                "type": room["type"],
+                "buzzed_players": [],
+                "players": []
+            }
+
+            for player in room:
+                if player["buzzed"]:
+                    preset_room["buzzed_players"].append(
+                        {
+                            "name": player["name"],
+                            "answer": player["answer"],
+                            "timestamp_buzz": player["timestamp_buzz"],
+                            "team": player["team"],
+                            "points": player["points"]
+                        }
+                    )
+                else:
+                    preset_room["players"].append( {
+                        "name": player["name"],
+                        "team": player["team"],
+                        "points": player["points"]
+                    } )
+
             return room
     return {"error": "room not found"}, 404
 
@@ -141,19 +192,14 @@ def buzz():
     time_buzz = json.get("time")
     for room in rooms:
         if room["code"] == room_code:
-            room["buzzed_players"].append(
-                {
-                    "name": player_name,
-                    "answer": "",
-                    "timestamp_buzz": time_buzz
-                }
-            )
+            for player in room["players"]:
+                if player["name"] == player_name:
+                    player["buzzed"] = True
+                    player["timestamp_buzz"] = time_buzz
             room["state"] = "buzzed"
-            # print( "remove", player_name, "from", room["players"] )
-            room["players"].remove( player_name )
-            room["buzzed_players"].sort( key=lambda x: x["timestamp_buzz"] )
+
     print( rooms )
-    return {"success": True}
+    return {"success": True}, 200
 
 @app.route( "/submit", methods=["POST"] )
 def submit_answer():
@@ -170,18 +216,14 @@ def submit_answer():
     time_buzz = json.get("time")
     for room in rooms:
         if room["code"] == room_code:
-            room["buzzed_players"].append(
-                {
-                    "name": player_name,
-                    "answer": answer_text,
-                    "timestamp_buzz": time_buzz
-                }
-            )
+            for player in room["players"]:
+                if player["name"] == player_name:
+                    player["buzzed"] = True
+                    player["answer"] = answer_text
+                    player["timestamp_buzz"] = time_buzz
             room["state"] = "buzzed"
-            room["players"].remove( player_name )
-            room["buzzed_players"].sort( key=lambda x: x["timestamp_buzz"] )
     print( rooms )
-    return {"success": True}
+    return {"success": True}, 200
 
 @app.route( "/reset-room", methods=["POST"] )
 def reset_room():
@@ -199,11 +241,11 @@ def reset_room():
         if room["code"] == room_code:
             room["state"] = "reset"
             room["type"] = "button" if reset_type == "buzz" else "text"
-            for player in room["buzzed_players"]:
-                room["players"].append( player["name"] )
-            room["buzzed_players"] = []
+            for player in room["players"]:
+                player["buzzed"] = False
+                player["answer"] = ""
     print( rooms )
-    return {"success": True}
+    return {"success": True}, 200
 
 @app.route( "/close-room", methods=["POST"] )
 def close_room():
@@ -220,7 +262,7 @@ def close_room():
             rooms.remove( room )
             break
     print( rooms )
-    return {"success": True}
+    return {"success": True}, 200
 
 @app.route( "/quit-player", methods=["POST"] )
 def quit_player():
@@ -235,13 +277,34 @@ def quit_player():
     player_name = json.get("player")
     for room in rooms:
         if room["code"] == room_code:
-            if player_name in room["players"]:
-                room["players"].remove( player_name )
-            if player_name in [p["name"] for p in room["buzzed_players"]]:
-                room["buzzed_players"] = [p for p in room["buzzed_players"] if p["name"] != player_name]
-            break
+            for player in room["players"]:
+                if player["name"] == player_name:
+                    room["players"].remove( player )
+                    break
     print( rooms )
-    return {"success": True}
+    return {"success": True}, 200
+
+@app.route( "/update-points", methods=["POST"] )
+def update_points():
+    json = None
+    try:
+        json = request.get_json( force=True )
+    except Exception as e:
+        print("Erreur JSON :", e)
+        return {"error": "invalid JSON"}, 400
+
+    room_code = json.get("code")
+    player_name = json.get("player")
+    points = json.get("points")
+
+    for room in rooms:
+        if room["code"] == room_code:
+            for player in room["players"]:
+                if player["name"] == player_name:
+                    player["points"] += points
+                    break
+    
+    return {"success": True}, 200
 
 class Pages:
     MAIN_PAGE = """<!DOCTYPE html>

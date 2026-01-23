@@ -1,4 +1,4 @@
 bouton mute
 bouton quit
-équipes ?
-points ?
+équipes + points
+make player quit room when tab is closed
