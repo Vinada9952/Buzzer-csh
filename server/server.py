@@ -243,29 +243,6 @@ def quit_player():
     print( rooms )
     return {"success": True}
 
-@app.route( "/get-custom-sound", methods=["POST"] )
-def get_custom_sound():
-    print( "get custom sound called" )
-    json = None
-    try:
-        json = request.get_json( force=True )
-    except Exception as e:
-        print("Erreur JSON :", e)
-        return {"error": "invalid JSON"}, 400
-    link = json.get("url")
-    print( "link =", link )
-
-    page = requests.get(link).text
-
-    sound_line = ''
-    for line in page.split( '\n' ):
-        if line.find( '.mp3' ) != -1:
-            sound_line = line
-            break
-
-    url = "https://www.myinstants.com" + sound_line.split( "'" )[1]
-    return { "url": url }
-
 class Pages:
     MAIN_PAGE = """<!DOCTYPE html>
 <html lang="fr">
@@ -428,12 +405,12 @@ class Pages:
         </style>
     </head>
     <body>
-        <button id="switch-to-change-sound" onclick="
+        <!-- <button id="switch-to-change-sound" onclick="
             document.getElementById('container').style.display = 'none';
             document.getElementById('switch-to-change-sound').style.display = 'none';
             document.getElementById('change-sound').style.display = 'block';">
             Changer le son
-        </button>
+        </button> -->
         <div id="container">
             <h1 style="color: white;">Buzzer CSH</h1>
 
@@ -722,12 +699,12 @@ class Pages:
         </style>
     </head>
     <body>
-        <button id="switch-to-change-sound" onclick="
+        <!-- <button id="switch-to-change-sound" onclick="
             document.getElementById('container').style.display = 'none';
             document.getElementById('switch-to-change-sound').style.display = 'none';
             document.getElementById('change-sound').style.display = 'block';">
             Changer le son
-        </button>
+        </button> -->
         <div id="container">
             
             <h1 style="color: white;">Buzzer CSH</h1>
@@ -815,11 +792,14 @@ class Pages:
                 })
                 .then(response => response.json())
                 .then(data => {
+                    console.log("response received");
                     console.log(data);
                     if( data.error ) {
                         alert("Erreur lors du changement de son.");
                     }
+                    console.log("no error");
                     buzz_sound = new Audio( data.url );
+                    console.log("change block values");
                     document.getElementById('change-sound').style.display = 'none';
                     document.getElementById('sound-input').value = "";
                     document.getElementById('container').style.display = 'block';

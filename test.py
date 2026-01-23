@@ -1,18 +1,15 @@
 # custom sounds
 
 import requests
-from pydub import AudioSegment
-from pydub.playback import play
 
+# response = requests.post("https://myinstants-api.vercel.app/", json=
+#     {
+#         "id": 3525
+#     }
+# )
 
-response = requests.get(input("Enter the MyInstants sound page URL: "))
+# print(response.json())
 
-page = response.text
-sound_line = ''
-for line in page.split( '\n' ):
-    if line.find( '.mp3' ) != -1:
-        sound_line = line
-        break
-
-url = "https://www.myinstants.com" + sound_line.split( "'" )[1]
-print( url )
+response = requests.get( "https://proxy.corsfix.com/?https://myinstants-api.vercel.app/detail?id=akh-70972" )
+data = response.text
+print(data)
