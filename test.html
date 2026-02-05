@@ -1,0 +1,49 @@
+<input type="text" id="urlInput" placeholder="Entrez l'URL ici">
+<button id="submitBtn">Soumettre</button>
+<script>
+    // À insérer dans une page web avec :
+// - un <input type="text" id="urlInput">
+// - un <button id="submitBtn">
+// - éventuellement un <div id="output">
+fetch("https://proxy.corsfix.com/?https://myinstants-api.vercel.app/detail?id=akh-70972")
+  .then(response => response.text())
+  .then(a => console.log(a))
+  .catch(err => console.error("Erreur :", err)); 
+
+// document.getElementById("submitBtn").addEventListener("click", async () => {
+//   const inputUrl = document.getElementById("urlInput").value.trim();
+//   if (!inputUrl) return;
+
+//   try {
+//     const proxy = "https://proxy.corsfix.com/?https://myinstants-api.vercel.app/detail?id=akh-70972";
+//     // const response = await fetch(proxy + encodeURIComponent(inputUrl));
+//     const page = await response.text();
+//     console.log(page);
+
+//     let soundLine = "";
+//     const lines = page.split("\n");
+
+//     for (const line of lines) {
+//       if (line.includes(".mp3")) {
+//         soundLine = line;
+//         break;
+//       }
+//     }
+
+//     if (!soundLine) {
+//       console.error("Aucun fichier mp3 trouvé");
+//       return;
+//     }
+
+//     const url = "https://www.myinstants.com" + soundLine.split("'")[1];
+//     console.log(url);
+
+//     // Optionnel : afficher le résultat dans la page
+//     const output = document.getElementById("output");
+//     if (output) output.textContent = url;
+
+//   } catch (err) {
+//     console.error("Erreur :", err);
+//   }
+// });
+</script>

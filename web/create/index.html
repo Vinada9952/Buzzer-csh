@@ -4,25 +4,190 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Buzzer CSH</title>
-        <link rel="stylesheet" href="styles.css">
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                margin: 0;
+                padding: 0;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                height: 100vh;
+                background-color: #292c34;
+            }
+
+
+
+            #container {
+                text-align: center;
+                background: #2e313d;
+                padding: 20px;
+                border-radius: 10px;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                width: 90%;
+                max-width: 500px;
+            }
+
+            #sound-input {
+                width: 80%;
+                padding: 10px;
+                margin-bottom: 10px;
+                border: 1px solid #ccc;
+                border-radius: 5px;
+            }
+
+
+            button {
+                padding: 10px 20px;
+                background-color: #cea6eb;
+                color: white;
+                border: none;
+                border-radius: 5px;
+                cursor: pointer;
+            }
+
+
+            button:hover {
+                padding: 10px 20px;
+                background-color: #c08ae6;
+                color: white;
+                border: none;
+                border-radius: 5px;
+                cursor: pointer;
+            }
+
+            #reset-buttons {
+                flex-direction: column;
+                align-items: center;
+                align-content: center;
+                align-self: center;
+            }
+            
+            #buzz-answer {
+                align-content: center;
+                align-items: center;
+                align-self: center;
+            }
+            
+            #type-answer {
+                align-content: center;
+                align-items: center;
+                align-self: center;
+            }
+        </style>
     </head>
     <body>
         <div id="container">
-            
             <h1 style="color: white;">Buzzer CSH</h1>
 
             <h3 style="color: white;" id="room-code">Code de salle : </h3>
 
-            <button id="buzz-answer">Rénitialiser et mettre une question collective</button>
-            <br><br>
-            <button id="type-answer">Rénitialiser et mettre une question par écrit</button>
+            <div id="reset-buttons">
+                <button id="buzz-answer">Réinitialiser - question collective</button>
+                <br><br>
+                <button id="type-answer">Réinitialiser - question écrite</button>
+            </div>
 
             <h2 style="color: white;">Joueurs ayant buzzé</h2>
             <div id="players-buzzed" style="color: white;"></div>
             <h2 style="color: white;">Joueurs</h2>
             <div id="players" style="color: white;"></div>
         </div>
-        <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
-        <script src="scripts.js"></script>
+        <script>
+            globalThis.buzz_sound = new Audio( "https://www.myinstants.com/media/sounds/wrong-answer-sound-effect.mp3" )
+            globalThis.last_state = "none";
+
+            globalThis.room_code = 0;
+            fetch('http://127.0.0.1:9952/create-room', {
+                method: 'GET',
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('room-code').innerText += " " + data.code;
+                room_code = data.code;
+            })
+            .catch(error => console.error('Erreur:', error));
+
+            document.getElementById('buzz-answer').onclick = function() {
+                fetch('http://127.0.0.1:9952/reset-room', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ code: room_code, type: "buzz" }),
+                })
+                .then(response => response.json())
+                .then(data => {})
+                .catch(error => console.error('Erreur:', error));
+            }
+
+            document.getElementById('type-answer').onclick = function() {
+                fetch('http://127.0.0.1:9952/reset-room', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ code: room_code, type: "text" }),
+                })
+                .then(response => response.json())
+                .then(data => {})
+                .catch(error => console.error('Erreur:', error));
+            }
+
+            window.addEventListener("beforeunload", function (e) {
+                fetch('http://127.0.0.1:9952/close-room', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ code: room_code }),
+                })
+            });
+
+            setInterval(function() {
+                if( room_code == 0 ) return;
+                fetch('http://127.0.0.1:9952/get_room', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ code: room_code }),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if( data.error ) {
+                        alert("Impossible de trouver la salle !");
+                        window.location.reload();
+                    }
+
+                    if( last_state == "reset" && data.state == "buzzed" && data.type == "button" ) {
+                        buzz_sound.play();
+                    }
+
+                    type_state = 'block';
+                    buzz_state = 'block';
+                    console.log( "data.state = " + data.state );
+                    if( data.type == "text" ) {
+                        document.getElementById('players-buzzed').innerHTML = data.buzzed_players.map(player => `<div>${player.name + " : " + player.answer + "<br>"}</div>`).join('');
+                        document.getElementById('players').innerHTML = data.players.map(player => `<div>${player}</div>`).join('');
+                        if( data.state == "reset" ) {
+                            type_state = 'none';
+                        }
+                    }
+                    if( data.type == "button" ) {
+                        document.getElementById('players-buzzed').innerHTML = data.buzzed_players.map(player => `<div>${player.name+"<br>"}</div>`).join('');
+                        document.getElementById('players').innerHTML = data.players.map(player => `<div>${player}</div>`).join('');
+                        if( data.state == "reset" ) {
+                            buzz_state = 'none';
+                        }
+                    }
+                    document.getElementById( "type-answer" ).style.display = type_state;
+                    document.getElementById( "buzz-answer" ).style.display = buzz_state;
+                    document.getElementById( "reset-buttons" ).style.display = "flex";
+                    last_state = data.state;
+                })
+                .catch(error => console.error('Erreur:', error));
+            }, 100);
+        </script>
     </body>
 </html>
